@@ -1,0 +1,586 @@
+{{ header }}{{ column_left }}
+<div id="content" class="module-agentfy">
+    <div class="page-header">
+        <div class="container-fluid">
+            <div class="form-inline pull-right">
+                {% if (stores) %}
+                    <select id="store" onChange="location = '{{ module_link }}&store_id=' + $('#store').val()"
+                            class="form-control">
+                        {% for store in stores %}
+                            <option value="{{ store['store_id'] }}" {{ store['store_id'] == store_id ? 'selected="selected"' : '' }}>{{ store['name'] }}</option>
+                        {% endfor %}
+                    </select>
+                {% endif %}
+                <button data-toggle="tooltip" title="{{ button_save }}" class="button-save btn btn-primary">
+                    <i class="fa fa-save"></i>
+                </button>
+                <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default">
+                    <i class="fa fa-reply"></i>
+                </a>
+            </div>
+            <h1>{{ heading_title }}</h1>
+            <ul class="breadcrumb">
+                {% for breadcrumb in breadcrumbs %}
+                    <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="container-fluid">
+        {% if error_warning %}
+            <div class="alert alert-danger alert-dismissible">
+                <i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        {% endif %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    <i class="fa fa-pencil"></i> {{ text_edit }}
+                </h3>
+            </div>
+            <div class="panel-body">
+                <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-module" class="form-horizontal">
+                    <ul class="nav nav-tabs">
+                        {% if not module_agentfy_setting['api_key'] %}
+                            <li class="active">
+                                <a href="#tab-general" data-toggle="tab">{{ tab_general }}</a>
+                            </li>
+                        {% endif %}
+                        {% if module_agentfy_setting['api_key'] %}
+                            <li class="active">
+                                <a href="#tab-sources" data-toggle="tab">{{ tab_sources }}</a>
+                            </li>
+                            <li>
+                                <a href="#tab-catalog" data-toggle="tab">{{ tab_catalog }}</a>
+                            </li>
+                            <li>
+                                <a href="#tab-display" data-toggle="tab">{{ tab_display }}</a>
+                            </li>
+                            <li>
+                                <a href="#tab-general" data-toggle="tab">{{ tab_general }}</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane {% if not module_agentfy_setting['api_key'] %} active {% endif %}" id="tab-general">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label" for="input-name">{{ entry_api_key }}</label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="module_agentfy_setting[api_key]" value="{{ module_agentfy_setting['api_key'] }}" placeholder="{{ entry_api_key }}" id="input-name" class="form-control"/>
+                                    {% if error_api_key %}
+                                        <div class="text-danger">{{ error_api_key }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+                                <div class="col-sm-10">
+                                    <select name="module_agentfy_status" id="input-status" class="form-control">
+                                        {% if module_agentfy_status %}
+                                            <option value="1" selected="selected">{{ text_enabled }}</option>
+                                            <option value="0">{{ text_disabled }}</option>
+                                        {% else %}
+                                            <option value="1">{{ text_enabled }}</option>
+                                            <option value="0" selected="selected">{{ text_disabled }}</option>
+                                        {% endif %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label" for="input-product-template">{{ entry_product_template }}</label>
+                                <div class="col-sm-10">
+                                    <textarea rows="20" name="module_agentfy_setting[product_template]" id="input-product-template" class="form-control">{{ module_agentfy_setting['product_template'] }}</textarea>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label" for="input-category-template">{{ entry_category_template }}</label>
+                                <div class="col-sm-10">
+                                    <textarea rows="20" name="module_agentfy_setting[category_template]" id="input-category-template" class="form-control">{{ module_agentfy_setting['category_template'] }}</textarea>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label" for="input-manufacturer-template">{{ entry_manufacturer_template }}</label>
+                                <div class="col-sm-10">
+                                    <textarea rows="20" name="module_agentfy_setting[manufacturer_template]" id="input-manufacturer-template" class="form-control">{{ module_agentfy_setting['manufacturer_template'] }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tab-catalog">
+                            <h1>{{tab_catalog}}</h1>
+                            <p>{{ text_subtitle_agent|replace({'<NAME OF KNOWLEDGE>': store_name}) }}</p>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label" for="input-agent">{{ entry_agent }}</label>
+                                <div class="col-sm-10">
+                                    <div class="input-group">
+                                        <input type="text" name="agent" value="{{ agent }}" placeholder="{{ entry_agent }}" id="input-agent" class="form-control"/>
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#agent_modal">{{ button_create_agent }}</button>
+                                        </span>
+                                    </div>
+                                    <input type="hidden" name="module_agentfy_setting[agent_id]" id="agent_id" value="{{ module_agentfy_setting['agent_id'] }}"/>
+                                    {% if error_agent %}
+                                        <div class="text-danger">{{ error_agent }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% if module_agentfy_setting['api_key'] %}
+                        <div class="tab-pane" id="tab-display">
+                            <h1>{{ tab_display }}</h1>
+                            <p>{{ text_subtitle_display }}</p>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="module-agentfy__displayPreview">
+                                        <div class="module-agentfy__displayPreviewButton --type-{{module_agentfy_display['button']['type']}}  --shadow-{{module_agentfy_display['button']['shadow']}}  --size-{{module_agentfy_display['button']['size']}}" style="background-color:{{module_agentfy_display['button']['color']}}">
+                                            <span class="module-agentfy__displayPreviewButtonIcon">
+                                                <i data-lucide="{{module_agentfy_display['button']['icon']}}" ></i>
+                                            </span>
+                                            <span class="module-agentfy__displayPreviewButtonTitle">
+                                                {{module_agentfy_display['button']['title']}}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-8">
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="input-button-name">{{ entry_button_name }}</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" name="module_agentfy_display[button][title]" placeholder="{{ entry_button_name }}" id="input-button-name" class="form-control" value="{{ module_agentfy_display['button']['title'] }}"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="input-button-icon">{{ entry_button_icon }}</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" name="module_agentfy_display[button][icon]" placeholder="{{ entry_button_icon }}" id="input-button-icon" class="form-control" value="{{ module_agentfy_display['button']['icon'] }}"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="input-button-color">{{ entry_button_color }}</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" name="module_agentfy_display[button][color]" placeholder="{{ entry_button_color }}" id="input-button-color" class="form-control" value="{{ module_agentfy_display['button']['color'] }}"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="input-button-size">{{ entry_button_size }}</label>
+                                        <div class="col-sm-10">
+                                            <select name="module_agentfy_display[button][size]" placeholder="{{ entry_button_size }}" id="input-button-size" class="form-control" value="{{ module_agentfy_display['button']['size'] }}">
+                                                <option value="xs">xs</option>
+                                                <option value="sm">sm</option>
+                                                <option value="md">md</option>
+                                                <option value="lg">lg</option>
+                                                <option value="xl">xl</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="input-button-size">{{ entry_button_animation }}</label>
+                                        <div class="col-sm-10">
+                                            <select name="module_agentfy_display[button][animation]" placeholder="{{ entry_button_animation }}" id="input-button-size" class="form-control" value="{{ module_agentfy_display['button']['animation'] }}">
+                                                <option value="none">none</option>
+                                                <option value="ping">ping</option>
+                                                <option value="pulse">pulse</option>
+                                                <option value="bounce">bounce</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="input-button-type">{{ entry_button_type }}</label>
+                                        <div class="col-sm-10">
+                                            <select name="module_agentfy_display[button][type]" placeholder="{{ entry_button_type }}" id="input-button-type" class="form-control" value="{{ module_agentfy_display['button']['type'] }}">
+                                                <option value="rounded">rounded</option>
+                                                <option value="square">square</option>
+                                                <option value="circle">circle</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="input-button-shadow">{{ entry_button_shadow }}</label>
+                                        <div class="col-sm-10">
+                                            <select name="module_agentfy_display[button][shadow]" placeholder="{{ entry_button_shadow }}" id="input-button-shadow" class="form-control" value="{{ module_agentfy_display['button']['shadow'] }}">
+                                                <option value="none">none</option>
+                                                <option value="sm">sm</option>
+                                                <option value="md">md</option>
+                                                <option value="lg">lg</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="input-button-position-left">{{ entry_button_position_left }}</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" name="module_agentfy_display[button][position][left]" placeholder="{{ entry_button_position_left }}" id="input-button-position-left" class="form-control" value="{{ module_agentfy_display['button']['position']['left'] }}"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="input-button-position-top">{{ entry_button_position_top }}</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" name="module_agentfy_display[button][position][top]" placeholder="{{ entry_button_position_top }}" id="input-button-position-top" class="form-control" value="{{ module_agentfy_display['button']['position']['top'] }}"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="input-button-position-right">{{ entry_button_position_right }}</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" name="module_agentfy_display[button][position][right]" placeholder="{{ entry_button_position_right }}" id="input-button-position-right" class="form-control" value="{{ module_agentfy_display['button']['position']['right'] }}"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label" for="input-button-position-bottom">{{ entry_button_position_bottom }}</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" name="module_agentfy_display[button][position][bottom]" placeholder="{{ entry_button_position_bottom }}" id="input-button-position-bottom" class="form-control" value="{{ module_agentfy_display['button']['position']['bottom'] }}"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        <div class="tab-pane active" id="tab-sources">
+                            <h1>{{ text_sources }}</h1>
+                            <p>{{ text_subtitle_sources|replace({'<NAME OF STORE>': store_name}) }}</p>
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <div class="agentfy__source-grid">
+                                        {% for type in types %}
+                                            <div style="position: relative;">
+                                                <div class="agentfy__source">
+                                                    <a class="agentfy__sourceAction" href="{{ sourceAction }}&type={{ type['code'] }}" data-toggle="tooltip" title="{{ button_reindex }}">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="agentfy__sourceActionIcon" width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-ccw">
+                                                            <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                                                            <path d="M3 3v5h5"/>
+                                                            <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                                                            <path d="M16 16h5v5"/>
+                                                        </svg>
+                                                    </a>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="agentfy__sourceIcon">
+                                                        <rect width="8" height="18" x="3" y="3" rx="1"></rect>
+                                                        <path d="M7 3v18"></path>
+                                                        <path d="M20.4 18.9c.2.5-.1 1.1-.6 1.3l-1.9.7c-.5.2-1.1-.1-1.3-.6L11.1 5.1c-.2-.5.1-1.1.6-1.3l1.9-.7c.5-.2 1.1.1 1.3.6Z"></path>
+                                                    </svg>
+                                                </div>
+                                                <div class="agentfy__sourceName">
+                                                    <div>{{type['title']}}</div>
+                                                    {% if type['source']%}
+                                                        {% if type['source']['status'] == 'not_indexed' %}
+                                                            <div class="text-info">Not Indexed</div>
+                                                        {% endif %}
+
+                                                        {% if type['source']['status'] == 'queued' %}
+                                                            <div class=" animate-pulse text-warning">Queued</div>
+                                                        {% endif %}
+
+                                                        {% if type['source']['status'] == 'pending' %}
+                                                            <div class=" animate-pulse text-warning">Pending</div>
+                                                        {% endif %}
+
+                                                        {% if type['source']['status'] == 'indexing' %}
+                                                            <div class=" animate-pulse text-warning">Indexing</div>
+                                                        {% endif %}
+
+                                                        {% if type['source']['status'] == 'summarizing' %}
+                                                            <div class=" animate-pulse text-warning">Summarizing</div>
+                                                        {% endif %}
+
+                                                        {% if type['source']['status'] == 'indexed' %}
+                                                            <div class="text-success">Indexed ({{type['source']['indexCount']}})</div>
+                                                        {% endif %}
+
+                                                        {% if type['source']['status'] == 'failed' %}
+                                                            <div class="text-danger">Failed</div>
+                                                        {% endif %}
+
+                                                        {% if type['source']['status'] == 'index_stopped' %}
+                                                            <div class="text-danger">Index Stopped</div>
+                                                        {% endif %}
+
+                                                        {% if type['source']['status'] == 'not_found' %}
+                                                            <div class="text-danger">Not Found</div>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <div id="agent_modal" class="modal fade">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="agent_modal_label">{{text_modal_title}}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ createAgent }}" method="post" enctype="multipart/form-data" id="form-create-agent" class="form-horizontal">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label" for="input-name">{{ entry_name }}</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="name" placeholder="{{ entry_name }}" id="input-name" class="form-control"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label" for="input-prompt">{{ entry_prompt }}</label>
+                            <div class="col-sm-10">
+                                <textarea name="prompt" placeholder="{{ entry_prompt }}" id="input-prompt" class="form-control" rows="10"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{button_close}}</button>
+                    <button type="button" class="btn btn-primary button_create_agent">{{button_create_agent}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+$('.module-agentfy').on('input', '[name^=module_agentfy_display]', function (e) {
+    var name = e.target.name.replace('module_agentfy_display', '');
+    var value = e.target.value;
+    if (name==="[button][title]") {
+        $('.module-agentfy__displayPreviewButtonTitle').html(value);
+    }
+    if (name==="[button][color]") {
+        $('.module-agentfy__displayPreviewButton').css({'background-color': value});
+    }
+    if (name==="[button][icon]") {
+        $('.module-agentfy__displayPreviewButtonIcon').html('<i data-lucide="'+value+'" ></span>');
+    }
+    if (name==="[button][size]") {
+        $('.module-agentfy__displayPreviewButton').removeClass('--size-xs')
+        $('.module-agentfy__displayPreviewButton').removeClass('--size-sm')
+        $('.module-agentfy__displayPreviewButton').removeClass('--size-md')
+        $('.module-agentfy__displayPreviewButton').removeClass('--size-lg')
+        $('.module-agentfy__displayPreviewButton').removeClass('--size-xl')
+        $('.module-agentfy__displayPreviewButton').addClass('--size-'+value)
+    }
+    if (name==="[button][type]") {
+        $('.module-agentfy__displayPreviewButton').removeClass('--type-rounded')
+        $('.module-agentfy__displayPreviewButton').removeClass('--type-square')
+        $('.module-agentfy__displayPreviewButton').removeClass('--type-circle')
+        $('.module-agentfy__displayPreviewButton').addClass('--type-'+value)
+    }
+    if (name==="[button][shadow]") {
+        $('.module-agentfy__displayPreviewButton').removeClass('--shadow-none')
+        $('.module-agentfy__displayPreviewButton').removeClass('--shadow-sm')
+        $('.module-agentfy__displayPreviewButton').removeClass('--shadow-md')
+        $('.module-agentfy__displayPreviewButton').removeClass('--shadow-lg')
+        $('.module-agentfy__displayPreviewButton').addClass('--shadow-'+value)
+    }
+    lucide.createIcons();
+})
+$('.module-agentfy').on('click', '.button_create_agent', function() {
+    $.ajax({
+        type: 'post',
+        url: $('#form-create-agent').attr('action'),
+        data: $('#form-create-agent').serialize(),
+        dataType: 'json',
+        success: function(json) {
+            $('.module-agentfy .alert-success').remove();
+
+            if (json['success']) {
+                $('.module-agentfy > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i><button type="button" class="close" data-dismiss="alert">&times;</button> ' + json['success'] + '</div>');
+
+                $('html, body').animate({scrollTop: $('.module-agentfy > .container-fluid .alert-success').offset().top}, 'slow');
+        $('#agent_modal').modal('hide');
+        if (json['agent']) {
+            $('input[name=\'module_agentfy_setting[agent_id]\']').val(json['agent'].id)
+            $('[name=agent]').val(json['agent'].name)
+        }
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+    });
+});
+$('.module-agentfy').on('click', '.button-save', function() {
+    $.ajax({
+        type: 'post',
+        url: $('#form-module').attr('action'),
+        data: $('#form-module').serialize(),
+        dataType: 'json',
+        success: function(json) {
+            $('.module-agentfy .alert-success').remove();
+            {% if not module_agentfy_setting['api_key'] %}
+            window.location.reload()
+            {% endif %}
+            if (json['success']) {
+                $('.module-agentfy > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i><button type="button" class="close" data-dismiss="alert">&times;</button> ' + json['success'] + '</div>');
+
+                $('html, body').animate({scrollTop: $('.module-agentfy > .container-fluid .alert-success').offset().top}, 'slow');
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+    });
+});
+
+$('input[name=\'agent\']').autocomplete({
+'source': function(request, response) {
+    $.ajax({
+        url: 'index.php?route=extension/module/agentfy/autocompleteAgents&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+        dataType: 'json',
+        success: function(json) {
+            json.unshift({
+                agent_id: 0,
+                name: '{{ text_none }}'
+            });
+
+            response($.map(json, function(item) {
+                return {
+                    label: item['name'],
+                    value: item['agent_id']
+                }
+            }));
+        }
+    });
+},
+'select': function(item) {
+    $('input[name=\'agent\']').val(item['label']);
+    $('input[name=\'module_agentfy_setting[agent_id]\']').val(item['value']);
+}
+});
+</script>
+<style>
+    .agentfy__source-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 16px;
+    }
+    .module-agentfy__displayPreview {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 20vh;
+    }
+    .agentfy__source {
+        padding: 16px;
+        /* cursor: pointer; */
+        height: 124px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 6px;
+        box-shadow: rgba(0, 0, 0, 0) 0 0 0 0, rgba(0, 0, 0, 0) 0 0 0 0, rgba(0, 0, 0, 0.1) 0 1px 3px 0, rgba(0, 0, 0, 0.1) 0 1px 2px -1px;
+    }
+    .agentfy__source:hover .agentfy__sourceIcon {
+        transform: matrix(1.05, 0, 0, 1.05, 0, 0);
+        transition-duration: 0.15s;
+        transition-property: all;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .module-agentfy__displayPreviewButtonIcon {
+        margin-right: 4px;
+    }
+    .module-agentfy__displayPreviewButton {
+        padding: 14px;
+        color: white;
+        display: flex;
+        align-items:center;
+        justify-content: center;
+        --tw-border-spacing-x: 0;
+        --tw-border-spacing-y: 0;
+        --tw-translate-x: 0;
+        --tw-translate-y: 0;
+        --tw-rotate: 0;
+        --tw-skew-x: 0;
+        --tw-skew-y: 0;
+        --tw-scale-x: 1;
+        --tw-scale-y: 1;
+        --tw-scroll-snap-strictness: proximity;
+        --tw-ring-offset-width: 0px;
+        --tw-ring-offset-color: #fff;
+        --tw-ring-color: rgb(59 130 246 / .5);
+        --tw-ring-offset-shadow: 0 0 #0000;
+        --tw-ring-shadow: 0 0 #0000;
+        --tw-shadow: 0 0 #0000;
+        --tw-shadow-colored: 0 0 #0000;
+    }
+    .module-agentfy__displayPreviewButton.--type-rounded {
+        border-radius: 9999px;
+    }
+    .module-agentfy__displayPreviewButton.--type-square {
+        border-radius: 0;
+
+    }
+    .module-agentfy__displayPreviewButton.--type-circle {
+        border-radius: 9999px;
+        aspect-ratio: 1 / 1;
+    }
+    .module-agentfy__displayPreviewButton.--shadow-none {
+        box-shadow:none;
+    }
+     .module-agentfy__displayPreviewButton.--shadow-sm {
+        --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / .05);
+        --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
+        box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),var(--tw-ring-shadow, 0 0 #0000),var(--tw-shadow);
+    }
+     .module-agentfy__displayPreviewButton.--shadow-md {
+        --tw-shadow: 0 4px 6px -1px rgb(0 0 0 / .1), 0 2px 4px -2px rgb(0 0 0 / .1);
+        --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
+        box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),var(--tw-ring-shadow, 0 0 #0000),var(--tw-shadow);
+    }
+     .module-agentfy__displayPreviewButton.--shadow-lg {
+        --tw-shadow: 0 10px 15px -3px rgb(0 0 0 / .1), 0 4px 6px -4px rgb(0 0 0 / .1);
+        --tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);
+        box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),var(--tw-ring-shadow, 0 0 #0000),var(--tw-shadow);
+    }
+    .module-agentfy__displayPreviewButton.--size-xs {
+        padding: 16px;
+        font-size: 12px;
+        line-height: 16px;
+    }
+    .module-agentfy__displayPreviewButton.--size-sm {
+        padding: 16px;
+        font-size: 14px;
+        line-height: 20px;
+    }
+    .module-agentfy__displayPreviewButton.--size-md {
+        padding: 16px;
+        font-size: 16px;
+        line-height: 24px;
+    }
+    .module-agentfy__displayPreviewButton.--size-lg {
+        padding: 16px;
+        font-size: 18px;
+        line-height: 28px;
+    }
+    .module-agentfy__displayPreviewButton.--size-xl {
+        padding: 16px;
+        font-size: 20px;
+        line-height: 28px;
+    }
+
+    .agentfy__sourceAction {
+        position: absolute;
+        cursor: pointer;
+        top: 1px;
+        right: 1px;
+        padding: 4px;
+        background-color: white;
+        border-radius: 4px;
+    }
+    .agentfy__sourceActionIcon {
+        width: 18px;
+        height: 18px;
+        color: #1e91cf;
+    }
+    .agentfy__sourceName {
+        font-size: 14px;
+        font-weight: 500;
+        margin: 8px 0;
+    }
+</style>
+{{ footer }}
