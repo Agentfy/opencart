@@ -1,8 +1,12 @@
+[![Agentfy AI OpenCart Extension](https://image.opencart.com/cache/675deaa5bfeec-resize-710x380.jpg)](https://www.opencart.com/index.php?route=marketplace/extension/info&extension_id=46749)
+
 # Agentfy AI OpenCart Extension 🤖🛍️
 
 **Turn Browsing into Buying with AI-Powered Chat for Your OpenCart Store**
 
 Agentfy AI brings intelligent chat capabilities to your OpenCart store, helping customers find the right products, get instant answers, and complete purchases seamlessly. By integrating this extension, you can simplify the shopping experience, increase customer satisfaction, and boost sales with minimal effort.
+
+[**View on OpenCart Marketplace**](https://www.opencart.com/index.php?route=marketplace/extension/info&extension_id=46749)
 
 ---
 
