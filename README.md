@@ -1,4 +1,4 @@
-[![Agentfy AI OpenCart Extension](https://image.opencart.com/cache/675deaa5bfeec-resize-710x380.jpg)](https://www.opencart.com/index.php?route=marketplace/extension/info&extension_id=46749)
+[![Agentfy AI OpenCart Extension](./docs/images/hero.png)
 
 # Agentfy AI OpenCart Extension 🤖🛍️
 
