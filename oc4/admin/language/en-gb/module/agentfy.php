@@ -25,6 +25,9 @@ $_['tab_display']       = 'Display';
 $_['tab_general']       = 'General';
 $_['tab_catalog']       = 'Agent';
 
+$_['text_important']   = 'Important!';
+$_['text_empty_template'] = 'If the product template is empty, indexing will not work.';
+
 $_['entry_button_name'] = 'Button Title';
 $_['entry_button_icon'] = 'Button Icon';
 $_['entry_button_color'] = 'Button Color';

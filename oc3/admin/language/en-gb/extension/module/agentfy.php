@@ -20,6 +20,9 @@ $_['entry_status']      = 'Status';
 $_['entry_name']        = 'Name';
 $_['entry_prompt']      = 'Prompt';
 
+$_['text_important']   = 'Important!';
+$_['text_empty_template'] = 'If the product template is empty, indexing will not work.';
+
 $_['tab_sources']       = 'Sources';
 $_['tab_display']       = 'Display';
 $_['tab_general']       = 'General';
