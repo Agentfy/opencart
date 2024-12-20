@@ -47,6 +47,7 @@ Follow these steps to get the Agentfy AI OpenCart Extension up and running in yo
 
 1. **Create an Account and API Key**:  
    - Sign up for an account at [Agentfy.ai](https://agentfy.ai).  
+   - Contact us at support[@]agentfy.ai to get your account approved.
    - Generate your **API Key** from the [API Keys page](https://agentfy.ai/apiKeys).  
 
 2. **Add API Key**:  
