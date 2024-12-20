@@ -182,21 +182,21 @@ class Agentfy extends \Opencart\System\Engine\Model {
 
         if (file_exists($cache)) {
             $this->session->data[
-                "agentfy_indexing_progress_".$store_id
+                "agentfy_indexing_progress_".$type."_".$store_id
             ] = $this->cache->get($cache);
         }
 
-        if (!isset($this->session->data["agentfy_indexing_progress_".$store_id])) {
-            $this->session->data["agentfy_indexing_progress_".$store_id] = [
+        if (!isset($this->session->data["agentfy_indexing_progress_".$type."_".$store_id])) {
+            $this->session->data["agentfy_indexing_progress_".$type."_".$store_id] = [
                 "step" => 0,
                 "last_step" => 0,
             ];
         }
 
         $limit = 10;
-        $step = $this->session->data["agentfy_indexing_progress_".$store_id]["step"];
+        $step = $this->session->data["agentfy_indexing_progress_".$type."_".$store_id]["step"];
         $last_step =
-            $this->session->data["agentfy_indexing_progress_".$store_id]["last_step"];
+            $this->session->data["agentfy_indexing_progress_".$type."_".$store_id]["last_step"];
         $countItems = 0;
 
         if ($steps[$step] === "indexing") {
@@ -252,7 +252,7 @@ class Agentfy extends \Opencart\System\Engine\Model {
         ];
 
         if ($step >= count($steps)) {
-            unset($this->session->data["agentfy_indexing_progress_".$store_id]);
+            unset($this->session->data["agentfy_indexing_progress_".$type."_".$store_id]);
 
             if (file_exists($cache)) {
                 unlink($cache);
@@ -270,14 +270,14 @@ class Agentfy extends \Opencart\System\Engine\Model {
             $return["step"] = $return["steps"];
             $return["success"] = true;
         } else {
-            $this->session->data["agentfy_indexing_progress_".$store_id][
+            $this->session->data["agentfy_indexing_progress_".$type."_".$store_id][
                 "last_step"
             ] = $last_step;
-            $this->session->data["agentfy_indexing_progress_".$store_id]["step"] = $step;
+            $this->session->data["agentfy_indexing_progress_".$type."_".$store_id]["step"] = $step;
 
             $this->cache->set(
                 $cache,
-                $this->session->data["agentfy_indexing_progress_".$store_id]
+                $this->session->data["agentfy_indexing_progress_".$type."_".$store_id]
             );
         }
 
