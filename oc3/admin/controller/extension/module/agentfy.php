@@ -416,6 +416,11 @@ class ControllerExtensionModuleAgentfy extends Controller
             }
             
             if (empty($data["source"])) {
+                unset($this->session->data["agentfy_indexing_progress_".$type."_".$store_id]);
+
+                if (file_exists("agentfy_indexing")) {
+                    unlink("agentfy_indexing");
+                }
                 $data["source"] = $this->model_extension_agentfy_api->addSource(
                     $_GET["type"],
                     $this->store_id
