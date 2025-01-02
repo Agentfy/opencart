@@ -385,6 +385,13 @@ class Agentfy extends \Opencart\System\Engine\Controller
         $this->load->model("extension/agentfy/module/agentfy");
         $this->load->model("extension/agentfy/module/agentfy/api");
 
+        if (!$this->user->hasPermission("modify", "extension/agentfy/module/agentfy")) {
+            $this->response->setOutput(
+                json_encode(["error" => $this->language->get("error_permission")])
+            );
+            return;
+        }
+
         $name = $this->request->post["name"];
         $prompt = $this->request->post["prompt"];
 
@@ -424,7 +431,13 @@ class Agentfy extends \Opencart\System\Engine\Controller
             ),
             true
         );
-
+        $setting = json_decode(
+            $this->model_setting_setting->getSettingValue(
+                "module_agentfy_setting",
+                $this->store_id
+            ),
+            true
+        );
         try {
             if (!empty($module_setting[$type])) {
                 $data["source"] = $this->model_extension_agentfy_module_agentfy_api->getSource(
@@ -432,7 +445,21 @@ class Agentfy extends \Opencart\System\Engine\Controller
                     $this->store_id
                 );
             }
-            
+            if ($type == "products") {
+                if (empty($setting["product_template"])) {
+                    $data['error_template'] = "product_template";
+                }
+            }
+            if ($type == "manufacturers") {
+                if (empty($setting["manufacturer_template"])) {
+                    $data['error_template'] = "manufacturer_template";
+                }
+            }
+            if ($type == "categories") {
+                if (empty($setting["category_template"])) {
+                    $data['error_template'] = "category_template";
+                }
+            }
             if (empty($data["source"])) {
                 unset($this->session->data["agentfy_indexing_progress_".$type."_".$store_id]);
 
@@ -446,6 +473,9 @@ class Agentfy extends \Opencart\System\Engine\Controller
             }
         } catch (\Exception $e) {
             $this->error["warning"] = $e->getMessage();
+        }
+        if (!$this->user->hasPermission("modify", "extension/agentfy/module/agentfy")) {
+            $this->error["warning"] = $this->language->get("error_permission");
         }
         if (!empty($data["source"])) {
 
@@ -557,6 +587,12 @@ class Agentfy extends \Opencart\System\Engine\Controller
     {
         $this->load->model("extension/agentfy/module/agentfy");
         $this->response->addHeader("Content-Type: application/json");
+        if (!$this->user->hasPermission("modify", "extension/agentfy/module/agentfy")) {
+            $this->response->setOutput(
+                json_encode(["error" => $this->language->get("error_permission")])
+            );
+            return;
+        }
         try {
             $json = $this->model_extension_agentfy_module_agentfy->indexing(
                 $_GET["type"],

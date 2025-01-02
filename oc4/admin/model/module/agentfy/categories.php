@@ -39,6 +39,11 @@ class Categories extends \Opencart\System\Engine\Model {
 
 		$template = $setting['category_template'];
 
+		if (empty($template)) {
+            throw new \Exception("Category Template is empty");
+            return;
+        }
+
 		$metadata = [];
 		$categoryPath = ($categoryInfo['path']) ? $categoryInfo['path'] . ' > ' . $categoryInfo['name'] : $categoryInfo['name'];
 		$decodedCategoryPath = html_entity_decode($categoryPath);

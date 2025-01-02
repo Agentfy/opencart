@@ -367,6 +367,13 @@ class ControllerExtensionModuleAgentfy extends Controller
         $this->load->model("extension/module/agentfy");
         $this->load->model("extension/agentfy/api");
 
+        if (!$this->user->hasPermission("modify", "extension/module/agentfy")) {
+            $this->response->setOutput(
+                json_encode(["error" => $this->language->get("error_permission")])
+            );
+            return;
+        }
+
         $name = $this->request->post["name"];
         $prompt = $this->request->post["prompt"];
 
@@ -406,7 +413,13 @@ class ControllerExtensionModuleAgentfy extends Controller
             ),
             true
         );
-
+        $setting = json_decode(
+            $this->model_setting_setting->getSettingValue(
+                "module_agentfy_setting",
+                $this->store_id
+            ),
+            true
+        );
         try {
             if (!empty($module_setting[$type])) {
                 $data["source"] = $this->model_extension_agentfy_api->getSource(
@@ -414,12 +427,28 @@ class ControllerExtensionModuleAgentfy extends Controller
                     $this->store_id
                 );
             }
-            
+            if ($type == "products") {
+                if (empty($setting["product_template"])) {
+                    $data['error_template'] = "product_template";
+                }
+            }
+            if ($type == "manufacturers") {
+                if (empty($setting["manufacturer_template"])) {
+                    $data['error_template'] = "manufacturer_template";
+                }
+            }
+            if ($type == "categories") {
+                if (empty($setting["category_template"])) {
+                    $data['error_template'] = "category_template";
+                }
+            }
             if (empty($data["source"])) {
-                unset($this->session->data["agentfy_indexing_progress_".$type."_".$store_id]);
+                if (!empty($this->session->data["agentfy_indexing_progress_".$type."_".$this->store_id])) {
+                    unset($this->session->data["agentfy_indexing_progress_".$type."_".$this->store_id]);
 
-                if (file_exists("agentfy_indexing")) {
-                    unlink("agentfy_indexing");
+                    if (file_exists("agentfy_indexing")) {
+                        unlink("agentfy_indexing");
+                    }
                 }
                 $data["source"] = $this->model_extension_agentfy_api->addSource(
                     $_GET["type"],
@@ -429,7 +458,11 @@ class ControllerExtensionModuleAgentfy extends Controller
         } catch (\Exception $e) {
             $this->error["warning"] = $e->getMessage();
         }
-        if (!empty($data["source"])) {
+        
+        if (!$this->user->hasPermission("modify", "extension/module/agentfy")) {
+            $this->error["warning"] = $this->language->get("error_permission");
+        }
+        if (!empty($data["source"]) && empty($this->error)) {
 
             $knowledgeId = $this->model_extension_module_agentfy->getKnowledgeId($this->store_id);
             $types = ["products", "categories", "manufacturers"];
@@ -537,8 +570,15 @@ class ControllerExtensionModuleAgentfy extends Controller
 
     public function indexing()
     {
+        $this->load->language("extension/module/agentfy");
         $this->load->model("extension/module/agentfy");
         $this->response->addHeader("Content-Type: application/json");
+        if (!$this->user->hasPermission("modify", "extension/module/agentfy")) {
+            $this->response->setOutput(
+                json_encode(["error" => $this->language->get("error_permission")])
+            );
+            return;
+        }
         try {
             $json = $this->model_extension_module_agentfy->indexing(
                 $_GET["type"],

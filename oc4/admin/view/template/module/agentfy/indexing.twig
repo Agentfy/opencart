@@ -24,6 +24,12 @@
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
             </div>
         {% endif %}
+        {% if error_template %}
+        <div class="alert alert-warning" role="alert">
+            <h4><strong>{{text_important}}</strong></h4>
+            {{text_empty_template}}
+        </div>
+        {% endif %}
         <div class="card">
             <div class="card-header">
                 <i class="fa fa-pencil"></i> {{ text_indexing }}

@@ -51,6 +51,11 @@ class ModelExtensionAgentfyProducts extends Model {
 		$setting = $module_setting["module_agentfy_setting"];
         
 		$template = $setting['product_template'];
+
+        if (empty($template)) {
+            throw new Exception("Product Template is empty");
+            return;
+        }
         $metadata = [];
         $metadata["title"] = html_entity_decode($productInfo['name'],ENT_QUOTES, 'UTF-8');
 

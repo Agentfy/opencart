@@ -32,7 +32,10 @@ class Manufacturers extends \Opencart\System\Engine\Model {
 		$setting = $module_setting["module_agentfy_setting"];
 
 		$template = $setting['manufacturer_template'];
-
+        if (empty($template)) {
+            throw new \Exception("Manufacturer Template is empty");
+            return;
+        }
 		$metadata = [];
         $metadata["title"] = html_entity_decode($manufacturerInfo['name'],ENT_QUOTES, 'UTF-8');
 

@@ -259,6 +259,10 @@ class Api extends \Opencart\System\Engine\Model {
             throw new \Exception("Invalid API key");
             return;
         }
+        if ($status == 401) {
+            throw new \Exception("Invalid API key");
+            return;
+        }
         if (!empty($response['error'])) {
             throw new \Exception($response['error']);
 

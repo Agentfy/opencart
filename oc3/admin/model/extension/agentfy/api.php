@@ -24,7 +24,6 @@ class ModelExtensionAgentfyApi extends Model
             "intervalHour" => 0,
             "intervalMinute" => 0,
         ], $store_id);
-
         if (!empty($response)) {
             $this->load->model("setting/setting");
 
@@ -254,6 +253,10 @@ class ModelExtensionAgentfyApi extends Model
         $status = curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
         $errors = curl_error($curl);
         if ($status == 403) {
+            throw new Exception("Invalid API key");
+            return;
+        }
+        if ($status == 401) {
             throw new Exception("Invalid API key");
             return;
         }
