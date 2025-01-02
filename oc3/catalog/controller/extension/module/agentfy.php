@@ -38,6 +38,12 @@ class ControllerExtensionModuleAgentFy extends Controller
         ENT_QUOTES,
         "UTF-8"
       );
+
+      $settingDisplay['apiUrl'] = html_entity_decode(
+        $setting["api_url"],
+        ENT_QUOTES,
+        "UTF-8"
+      );
     }
 
     $data['options']= $settingDisplay;

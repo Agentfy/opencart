@@ -28,16 +28,18 @@ class ControllerExtensionModuleAgentfy extends Controller
 
         $this->load->model("setting/setting");
 
-        if (isset($this->error["warning"])) {
-            $data["error_warning"] = $this->error["warning"];
-        } else {
-            $data["error_warning"] = "";
-        }
+
 
         if (isset($this->error["api_key"])) {
             $data["error_api_key"] = $this->error["api_key"];
         } else {
             $data["error_api_key"] = "";
+        }
+
+        if (isset($this->error["api_url"])) {
+            $data["error_api_url"] = $this->error["api_url"];
+        } else {
+            $data["error_api_url"] = "";
         }
 
         if (isset($this->error["agent_id"])) {
@@ -182,24 +184,34 @@ class ControllerExtensionModuleAgentfy extends Controller
         }
 
         foreach ($data["types"] as $key => $value) {
-            $sourceId = $this->model_extension_module_agentfy->getSourceId(
-                $value["code"],
-                $this->store_id
-            );
-            if (!empty($sourceId)) {
-                $response = $this->model_extension_agentfy_api->getSource(
-                    $sourceId,
+            try {
+                $sourceId = $this->model_extension_module_agentfy->getSourceId(
+                    $value["code"],
                     $this->store_id
                 );
-                if (!empty($response)) {
-                    $data["types"][$key]["source"] = $response;
+                if (!empty($sourceId)) {
+                    $response = $this->model_extension_agentfy_api->getSource(
+                        $sourceId,
+                        $this->store_id
+                    );
+                    if (!empty($response)) {
+                        $data["types"][$key]["source"] = $response;
+                    }
                 }
+            } catch (Exception $e) {
+                $this->error["warning"] = $e->getMessage();
             }
         }
 
         $this->load->model("localisation/language");
 
         $data["languages"] = $this->model_localisation_language->getLanguages();
+
+        if (isset($this->error["warning"])) {
+            $data["error_warning"] = $this->error["warning"];
+        } else {
+            $data["error_warning"] = "";
+        }
 
         if (isset($this->request->post["module_agentfy_status"])) {
             $data["module_agentfy_status"] =
@@ -550,6 +562,40 @@ class ControllerExtensionModuleAgentfy extends Controller
             ) > 64
         ) {
             $this->error["api_key"] = $this->language->get("error_api_key");
+        }
+
+
+        if (
+            mb_strlen(
+                $this->request->post["module_agentfy_setting"]["api_url"]
+            ) < 3
+        ) {
+            $this->error["api_url"] = $this->language->get("error_api_url");
+        }
+
+        if (
+            mb_strlen(
+                $this->request->post["module_agentfy_setting"]["product_template"]
+            ) < 3
+        ) {
+            $this->error["product_template"] = $this->language->get("error_product_template");
+        }
+
+
+        if (
+            mb_strlen(
+                $this->request->post["module_agentfy_setting"]["category_template"]
+            ) < 3
+        ) {
+            $this->error["category_template"] = $this->language->get("error_category_template");
+        }
+
+        if (
+            mb_strlen(
+                $this->request->post["module_agentfy_setting"]["manufacturer_template"]
+            ) < 3
+        ) {
+            $this->error["manufacturer_template"] = $this->language->get("error_manufacturer_template");
         }
 
         return !$this->error;

@@ -13,6 +13,7 @@ $_['text_count_documents'] = 'Count Documents';
 $_['button_reindex']    = 'Reindex';
 // Entry
 $_['entry_api_key']     = 'Api Key';
+$_['entry_api_url']     = 'Api Url';
 $_['entry_sources']     = 'Sources';
 $_['entry_agent']       = 'Agent';
 $_['entry_description'] = 'Description';
@@ -62,3 +63,7 @@ $_['button_close'] = 'Close';
 $_['success_save']		= 'Success: You have modified Agentfy.AI!';
 $_['error_permission']  = 'Warning: You do not have permission to modify Agentfy!';
 $_['error_name']        = 'Module Name must be between 3 and 64 characters!';
+$_['error_api_url']        = 'The \'Api Url\' field is required.';
+$_['error_product_template']        = 'The \'Product Template\' field is required. If the product template is empty, indexing will not work.';
+$_['error_category_template']        = 'The \'Category Template\' field is required.';
+$_['error_manufacturer_template']        = 'The \'Manufacturer Template\' field is required.';

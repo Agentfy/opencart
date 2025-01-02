@@ -227,8 +227,14 @@ class Api extends \Opencart\System\Engine\Model {
         $module_setting = json_decode($setting, true);
         $curl = curl_init();
 
+        $apiUrl = $this->apiUrl;
+
+        if (!empty($module_setting['api_url'])) {
+            $apiUrl = $module_setting['api_url'];
+        }
+
         curl_setopt_array($curl, [
-            CURLOPT_URL => $this->apiUrl . $url,
+            CURLOPT_URL => $apiUrl . $url,
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_ENCODING => "",
             CURLOPT_MAXREDIRS => 10,
@@ -250,15 +256,15 @@ class Api extends \Opencart\System\Engine\Model {
         $status = curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
         $errors = curl_error($curl);
         if ($status == 403) {
-            throw new Exception("Invalid API key");
+            throw new \Exception("Invalid API key");
             return;
         }
         if (!empty($response['error'])) {
-            throw new Exception($response['error']);
+            throw new \Exception($response['error']);
 
         }
         if (!empty($errors)) {
-            throw new Exception($errors);
+            throw new \Exception($errors);
         }
 
         if (!empty($response)) {

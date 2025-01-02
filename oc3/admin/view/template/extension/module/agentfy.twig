@@ -74,6 +74,15 @@
                                 </div>
                             </div>
                             <div class="form-group">
+                                <label class="col-sm-2 control-label" for="input-api_url">{{ entry_api_url }}</label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="module_agentfy_setting[api_url]" value="{{ module_agentfy_setting['api_url'] }}" placeholder="{{ entry_api_url }}" id="input-name" class="form-control"/>
+                                    {% if error_api_url %}
+                                        <div class="text-danger">{{ error_api_url }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="form-group">
                                 <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
                                 <div class="col-sm-10">
                                     <select name="module_agentfy_status" id="input-status" class="form-control">
@@ -418,6 +427,7 @@ $('.module-agentfy').on('click', '.button-save', function() {
         dataType: 'json',
         success: function(json) {
             $('.module-agentfy .alert-success').remove();
+            $('.module-agentfy .alert-danger').remove();
             {% if not module_agentfy_setting['api_key'] %}
             window.location.reload()
             {% endif %}
@@ -425,6 +435,11 @@ $('.module-agentfy').on('click', '.button-save', function() {
                 $('.module-agentfy > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i><button type="button" class="close" data-dismiss="alert">&times;</button> ' + json['success'] + '</div>');
 
                 $('html, body').animate({scrollTop: $('.module-agentfy > .container-fluid .alert-success').offset().top}, 'slow');
+            } else if (json['error']) {
+                let errorKey = Object.keys(json.error).length > 0 ? Object.keys(json.error)[0] : undefined
+                if (errorKey) {
+                    $('.module-agentfy > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i><button type="button" class="close" data-dismiss="alert">×</button> ' + json['error'][errorKey] + '</div>');
+                }
             }
         },
         error: function(xhr, ajaxOptions, thrownError) {

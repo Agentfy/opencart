@@ -226,8 +226,13 @@ class ModelExtensionAgentfyApi extends Model
         $module_setting = json_decode($setting, true);
         $curl = curl_init();
 
+        $apiUrl = $this->apiUrl;
+
+        if (!empty($module_setting["api_url"])) {
+            $apiUrl = $module_setting["api_url"];
+        }
         curl_setopt_array($curl, [
-            CURLOPT_URL => $this->apiUrl . $url,
+            CURLOPT_URL => $apiUrl . $url,
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_ENCODING => "",
             CURLOPT_MAXREDIRS => 10,
