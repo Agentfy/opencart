@@ -462,6 +462,7 @@ class ControllerExtensionModuleAgentfy extends Controller
         if (!$this->user->hasPermission("modify", "extension/module/agentfy")) {
             $this->error["warning"] = $this->language->get("error_permission");
         }
+
         if (!empty($data["source"]) && empty($this->error)) {
 
             $knowledgeId = $this->model_extension_module_agentfy->getKnowledgeId($this->store_id);

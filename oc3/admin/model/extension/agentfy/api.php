@@ -24,7 +24,7 @@ class ModelExtensionAgentfyApi extends Model
             "intervalHour" => 0,
             "intervalMinute" => 0,
         ], $store_id);
-        if (!empty($response)) {
+        if (!empty($response['data'])) {
             $this->load->model("setting/setting");
 
             $module_setting = $this->model_setting_setting->getSetting(
@@ -126,7 +126,7 @@ class ModelExtensionAgentfyApi extends Model
         return !empty($response) ? $response['data'] : null;
     }
 
-    public function addDocument($sourceId, $externalId, $name, $pageContent, $metadata = [], $store_id)
+    public function addDocument($sourceId, $externalId, $name, $pageContent, $metadata = [], $store_id = 0)
     {
         return $this->request("POST", "/sources/" . $sourceId . "/documents", [
             "externalId" => $externalId,
@@ -144,7 +144,7 @@ class ModelExtensionAgentfyApi extends Model
         $name,
         $pageContent,
         $metadata = [],
-        $store_id
+        $store_id = 0
     ) {
         $response = $this->request(
             "PUT",
@@ -194,7 +194,7 @@ class ModelExtensionAgentfyApi extends Model
         }
     }
 
-    public function getAgents($search = "", $store_id)
+    public function getAgents($search = "", $store_id = 0)
     {
         $response = $this->request("GET", "/agents?search=" . $search, [], $store_id);
 
