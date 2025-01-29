@@ -121,6 +121,9 @@ class ModelExtensionAgentfyApi extends Model
             "prompt" => $prompt,
             "knowledgeId" => $knowledgeId,
             "public" => false,
+            "useRerank" => false,
+            "useSearchPrompt" => false,
+            "searchCount" => 0
         ], $store_id);
 
         return !empty($response) ? $response['data'] : null;

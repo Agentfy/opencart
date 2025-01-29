@@ -25,7 +25,7 @@ var AgentFy = (function () {
     };
 }());
 
-window.addEventListener('load', function () {
-    AgentFy.init();
-});
-
+(function(){
+    AgentFy.init()  
+  })()
+  
