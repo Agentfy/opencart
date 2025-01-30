@@ -168,6 +168,20 @@ class ModelExtensionAgentfyApi extends Model
         }
     }
 
+    public function deleteAllDocuments($sourceId, $store_id)
+    {
+        $response = $this->request("DELETE", "/sources/" . $sourceId . "/documents", [], $store_id);
+        if (!empty($response)) {
+            return $response;
+        }
+    }
+    public function deleteAllIndexes($sourceId, $store_id)
+    {
+        $response = $this->request("DELETE", "/sources/" . $sourceId . "/indexes", [], $store_id);
+        if (!empty($response)) {
+            return $response;
+        }
+    }
     public function indexDocument($sourceId, $documentId, $store_id)
     {
         return $this->request(

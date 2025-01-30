@@ -158,7 +158,7 @@ class Agentfy extends \Opencart\System\Engine\Model {
         }
     }
 
-    public function indexing($type, $store_id)
+    public function indexing($mode, $type, $store_id)
     {
         $cache = "agentfy_indexing";
 
@@ -175,8 +175,13 @@ class Agentfy extends \Opencart\System\Engine\Model {
             throw new Exception("not found source");
             return;
         }
-        $steps = [$type];
-        if ($source["status"] != "indexed") {
+        if ($mode == 'reset') {
+            $steps = ["deleteIndexes", "deleteDocuments"];
+        } else {
+            $steps = [$type];
+        }
+        if ($source["status"] != "indexed" && $mode != 'reset') {
+            
             array_push($steps, "indexing");
         }
 
@@ -186,19 +191,26 @@ class Agentfy extends \Opencart\System\Engine\Model {
             ] = $this->cache->get($cache);
         }
 
-        if (!isset($this->session->data["agentfy_indexing_progress_".$type."_".$store_id])) {
-            $this->session->data["agentfy_indexing_progress_".$type."_".$store_id] = [
+        if (!isset($this->session->data[ "agentfy_indexing_progress_".$type."_".$store_id])) {
+            $this->session->data[ "agentfy_indexing_progress_".$type."_".$store_id] = [
                 "step" => 0,
                 "last_step" => 0,
             ];
         }
-
         $limit = 10;
-        $step = $this->session->data["agentfy_indexing_progress_".$type."_".$store_id]["step"];
+        $step = $this->session->data[ "agentfy_indexing_progress_".$type."_".$store_id]["step"];
         $last_step =
-            $this->session->data["agentfy_indexing_progress_".$type."_".$store_id]["last_step"];
+            $this->session->data[ "agentfy_indexing_progress_".$type."_".$store_id]["last_step"];
         $countItems = 0;
 
+        if ($steps[$step] === "deleteIndexes") {
+            $this->model_extension_agentfy_module_agentfy_api->deleteAllIndexes($sourceId, $store_id);
+            $source = $this->model_extension_agentfy_module_agentfy_api->getSource($sourceId, $store_id);
+        }
+        if ($steps[$step] === "deleteDocuments") {
+            $this->model_extension_agentfy_module_agentfy_api->deleteAllDocuments($sourceId, $store_id);
+            $source = $this->model_extension_agentfy_module_agentfy_api->getSource($sourceId, $store_id);
+        }
         if ($steps[$step] === "indexing") {
             $this->model_extension_agentfy_module_agentfy_api->indexSource($sourceId, $store_id);
         }
@@ -233,7 +245,7 @@ class Agentfy extends \Opencart\System\Engine\Model {
         }
 
         $progress = $countItems
-            ? round(($source["documentCount"] / $countItems) * 100, 3)
+            ? round((($last_step * $limit) / $countItems) * 100, 3)
             : 100;
 
         if ($progress >= 100) {
@@ -244,8 +256,9 @@ class Agentfy extends \Opencart\System\Engine\Model {
 
         $return = [
             "steps" => count($steps),
-            "current" => $source["documentCount"],
+            "current" =>  ($last_step * $limit),
             "count" => $countItems,
+            "documentCount" => $source["documentCount"],
             "progress" => $progress > 100 ? 100 : $progress,
             "last_step" => $last_step,
             "step" => $step + 1,
@@ -302,5 +315,84 @@ class Agentfy extends \Opencart\System\Engine\Model {
             }
         }
         return $result;
+    }
+
+    
+
+    public function getAllStores()
+    {
+        $this->load->model('setting/store');
+        $stores = $this->model_setting_store->getStores();
+        $result = array();
+        $result[] = array(
+            'store_id' => 0,
+            'name'     => $this->config->get('config_name')
+        );
+        if ($stores) {
+            foreach ($stores as $store) {
+                $result[] = array(
+                    'store_id' => $store['store_id'],
+                    'name'     => $store['name']
+                );
+            }
+        }
+        return $result;
+    }
+
+    public function getPrompt($store_id) {
+        $prompt = "Role: You are a friendly and knowledgeable virtual assistant for [Store Name], an eCommerce platform specializing in [Product Category]. Your primary goal is to assist customers with any questions they may have, provide tailored recommendations, guide them through purchases, and ensure a smooth shopping experience.
+
+Tone: Your tone is professional yet conversational, ensuring customers feel valued and understood. Use simple and clear language, with a touch of warmth and enthusiasm to enhance the user experience.
+
+Key Features & Behavior
+Product Discovery:
+
+Help customers explore products based on their preferences.
+Provide comparisons, key features, and unique selling points.
+Example: \"Are you looking for something specific, like [Product Type], or would you like me to suggest our bestsellers?\"
+Customer Support:
+
+Answer questions about product availability, specifications, shipping, and returns.
+Provide clear steps for resolving issues (e.g., how to track an order or initiate a return).
+Example: \"If you\'d like to track your order, you can do so by visiting [Tracking Page URL] or providing me your order number.\"
+Personalized Recommendations:
+
+Use context to suggest products or offers tailored to the customer’s needs.
+Example: \"Since you’re interested in [Product Category], you might love our new [Product Line/Collection]. Would you like to know more?\"
+Upselling & Promotions:
+
+Inform customers about ongoing deals, bundles, or complementary items.
+Example: \"Pairing [Product] with [Accessory] could be a great choice! We’re also offering 20% off this combo.\"
+Engaging FAQs:
+
+Handle frequently asked questions about policies, payment methods, and support hours.
+Example: \"Yes, we ship internationally! Shipping times and costs vary based on your location. Let me know where you’re based, and I’ll provide details.\"
+Polished Closing:
+
+Always close interactions positively, encouraging further assistance.
+Example: \"Is there anything else I can assist you with? I’m here to help!\"";
+
+        $stores = $this->getAllStores();
+
+        $store = array_filter($stores, function ($store) use ($store_id) {
+            return $store["store_id"] == $store_id;
+        });
+        $store = $store[0];
+
+        $this->load->model("catalog/category");
+        $categories = $this->model_catalog_category->getCategories(["start" => 0, "limit" => 2]);
+        $category = $this->model_catalog_category->getCategory($categories[0]["category_id"]);
+        $categorySecond = $this->model_catalog_category->getCategory($categories[1]["category_id"]);
+
+        $this->load->model("catalog/product");
+        $products = $this->model_catalog_product->getProducts(["start" => 0, "limit" => 2]);
+        $product = $products[0];
+        $productSecond = $products[1];
+
+        return str_replace(
+            ["[Store Name]", "[Product Category]", "[Product]", "[Tracking Page URL]", "[Product Line/Collection]", "[Accessory]", "[Product Type]"], 
+            [$store["name"], $category["name"], $product["name"], HTTP_CATALOG, $categorySecond["name"], $productSecond["name"], $categorySecond["name"]], 
+            $prompt
+        );
     }
 }

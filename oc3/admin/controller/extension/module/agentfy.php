@@ -222,6 +222,8 @@ class ControllerExtensionModuleAgentfy extends Controller
             );
         }
 
+        $data["prompt"] = $this->model_extension_module_agentfy->getPrompt($this->store_id);
+
         $data["header"] = $this->load->controller("common/header");
         $data["column_left"] = $this->load->controller("common/column_left");
         $data["footer"] = $this->load->controller("common/footer");
@@ -582,6 +584,7 @@ class ControllerExtensionModuleAgentfy extends Controller
         }
         try {
             $json = $this->model_extension_module_agentfy->indexing(
+                $_GET['mode'],
                 $_GET["type"],
                 $this->store_id
             );

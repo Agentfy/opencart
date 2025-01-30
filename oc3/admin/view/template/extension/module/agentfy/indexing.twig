@@ -36,14 +36,52 @@
             </div>
             <div class="panel-body">
                 <form action="<?php echo $action; ?>" method="post" enctype="multipart/form-data" id="form" class="form-horizontal">
-                    <div class="text-center" style="margin-bottom: 10px;">{{ text_installation_progress }}</div>
-                    <div class="text-center" style="margin-bottom: 10px;">{{text_indexing_not_close}}</div>
-                    <div class="progress">
-                        <div id="progress-create-cache" class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
-                            <span class="sr-only"></span>
+                    <div id="source-action" class="text-center" style="margin-bottom: 20px;">
+                        <div class="panel panel-default" style="max-width: 800px; margin: 0 auto;">
+                            <div class="panel-body">
+                                <div class="media" >
+                
+                                    <div class="media-body text-left">
+                                        <h4 class="media-heading"> Synchronization</h4>
+                                        <p>We will synchronize the records from your website into the Agentfy.ai database.</p>
+                                    </div>
+                                    <div class="media-right">
+                                        <button type="button" id="btn-refresh" class="btn btn-primary" style="margin-bottom: 10px;">Start</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="progress-info text-center"></div>
+                    <div id="source-progress" style="display:none; margin-bottom: 20px;">
+                        <div class="text-center" style="margin-bottom: 10px;">{{ text_installation_progress }}</div>
+                        <div class="text-center" style="margin-bottom: 10px;">{{text_indexing_not_close}}</div>
+                        <div class="progress">
+                            <div id="progress-create-cache" class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                                <span class="sr-only"></span>
+                            </div>
+                        </div>
+                        <div class="progress-info text-center"></div>
+                    </div>
+                    <div id="source-action" class="text-center">
+                        <div class="panel panel-danger" style="max-width: 800px; margin: 0 auto;">
+                            <div class="panel-body">
+                                <div class="media" >
+                
+                                    <div class="media-body text-left">
+                                        <h4 class="media-heading">Clear Database</h4>
+                                        <p>This action will delete all records from the Agentfy.ai database.</p>
+                                    </div>
+                                    <div class="media-right">
+                                        <button type="button" id="btn-reset" class="btn btn-danger" style="margin-bottom: 10px;">Clear Database</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <p>
+                            
+                        </p>
+                    </div>
                 </form>  
             </div>
         </div>
@@ -59,9 +97,9 @@
             $('.progress-info').text(text_progress);
             $('#progress-create-cache').attr('style', 'width:'+data.progress+'%');
         }
-        function install(){
+        function install(mode = 'refresh'){
             $.ajax({
-                url:'{{ create_cache }}',
+                url:'{{ create_cache }}&mode='+mode,
                 dataType:'json',
                 type:'post',
                 success:function(json){
@@ -75,14 +113,35 @@
                     }
                     else{
                         update(json);
-                        install();
+                        install(mode);
                     }
 
                 }
                 
             });
         }
-        install();
+        $('#btn-sync').click(function() {
+            console.log('sync');
+            $("#source-action").hide()
+            $('#source-progress').show()
+            install('sync');
+        })
+        
+        $('#btn-reset').click(function() {
+            console.log('reset');
+            $("#source-action").hide()
+            $('#source-progress').show()
+            install('reset');
+        })
+        
+        $('#btn-refresh').click(function() {
+            console.log('refresh');
+            $("#source-action").hide()
+            $('#source-progress').show()
+            install('refresh');
+        })
     });
+
+
 </script>
 {{ footer }}

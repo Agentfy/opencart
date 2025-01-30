@@ -23,6 +23,7 @@ $_['entry_prompt']      = 'Prompt';
 
 $_['text_important']   = 'Important!';
 $_['text_empty_template'] = 'If the product template is empty, indexing will not work.';
+$_['text_api_key']      = 'To begin, please create an account on <a href="https://agentfy.ai" target="_blank">Agentfy.ai</a>. Once registered, navigate to the dashboard to generate your <a href="https://agentfy.ai/apiKeys" target="_blank">API Key</a>.';
 
 $_['tab_sources']       = 'Sources';
 $_['tab_display']       = 'Display';
