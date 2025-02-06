@@ -20,6 +20,8 @@ $_['entry_description'] = 'Description';
 $_['entry_status']      = 'Status';
 $_['entry_name']        = 'Name';
 $_['entry_prompt']      = 'Prompt';
+$_['entry_bestseller_count'] = 'Minimum sales to qualify as Best Seller';
+$_['entry_topseller_count'] = 'Minimum sales to qualify as Top Seller';
 
 $_['tab_sources']       = 'Sources';
 $_['tab_display']       = 'Display';

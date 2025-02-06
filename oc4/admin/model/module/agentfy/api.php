@@ -234,6 +234,14 @@ class Api extends \Opencart\System\Engine\Model {
         }
     }
 
+    public function getKnowledge($id, $store_id)
+    {
+        $response = $this->request("GET", "/knowledges/" . $id, [], $store_id);
+
+        if (!empty($response["data"])) {
+            return $response["data"];
+        }
+    }
     public function request($method, $url, $body = [], $store_id = 0)
     {
         $this->load->model("setting/setting");

@@ -76,7 +76,7 @@ class Agentfy extends \Opencart\System\Engine\Controller
       $timestamp = round(microtime(true) * 1000);
       
       $this->document->addScript("https://sdk.agentfy.ai/client-latest.umd.js?t=" . $timestamp);
-      $this->document->addScript("catalog/view/javascript/agentfy.js?t=" . $timestamp);
+      $this->document->addScript("extension/agentfy/catalog/view/javascript/agentfy.js?t=" . $timestamp);
 
     }
   }

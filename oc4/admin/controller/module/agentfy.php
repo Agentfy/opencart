@@ -240,7 +240,7 @@ class Agentfy extends \Opencart\System\Engine\Controller
             $data["module_agentfy_status"] = $setting;
         }
 
-        $data["prompt"] = $this->model_extension_module_agentfy->getPrompt($this->store_id);
+        $data["prompt"] = $this->model_extension_agentfy_module_agentfy->getPrompt($this->store_id);
         $data["header"] = $this->load->controller("common/header");
         $data["column_left"] = $this->load->controller("common/column_left");
         $data["footer"] = $this->load->controller("common/footer");
@@ -397,6 +397,7 @@ class Agentfy extends \Opencart\System\Engine\Controller
         $prompt = $this->request->post["prompt"];
 
         $knowledgeId = $this->model_extension_agentfy_module_agentfy->getKnowledgeId($this->store_id);
+
         if (!empty($knowledgeId)) {
             $agent = $this->model_extension_agentfy_module_agentfy_api->addAgent(
                 $name,
@@ -433,7 +434,7 @@ class Agentfy extends \Opencart\System\Engine\Controller
             true
         );
         $setting = json_decode(
-            $this->model_setting_setting->getSettingValue(
+            $this->model_setting_setting->getValue(
                 "module_agentfy_setting",
                 $this->store_id
             ),
@@ -462,7 +463,7 @@ class Agentfy extends \Opencart\System\Engine\Controller
                 }
             }
             if (empty($data["source"])) {
-                unset($this->session->data["agentfy_indexing_progress_".$type."_".$store_id]);
+                unset($this->session->data["agentfy_indexing_progress_".$type."_".$this->store_id]);
 
                 if (file_exists("agentfy_indexing")) {
                     unlink("agentfy_indexing");

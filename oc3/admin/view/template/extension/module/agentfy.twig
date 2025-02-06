@@ -90,6 +90,25 @@
                                 </div>
                             </div>
                             <div class="form-group">
+                                <label class="col-sm-2 control-label" for="input-topseller_count">{{ entry_topseller_count }}</label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="module_agentfy_setting[topseller_count]" value="{{ module_agentfy_setting['topseller_count'] }}" placeholder="{{ entry_topseller_count }}" id="input-topseller_count" class="form-control"/>
+                                    {% if error_topseller_count %}
+                                        <div class="text-danger">{{ error_topseller_count }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label" for="input-bestseller_count">{{ entry_bestseller_count }}</label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="module_agentfy_setting[bestseller_count]" value="{{ module_agentfy_setting['bestseller_count'] }}" placeholder="{{ entry_bestseller_count }}" id="input-bestseller_count" class="form-control"/>
+                                    {% if error_bestseller_count %}
+                                        <div class="text-danger">{{ error_bestseller_count }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
                                 <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
                                 <div class="col-sm-10">
                                     <select name="module_agentfy_status" id="input-status" class="form-control">

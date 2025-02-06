@@ -467,8 +467,8 @@ class ControllerExtensionModuleAgentfy extends Controller
 
         if (!empty($data["source"]) && empty($this->error)) {
 
-            $knowledgeId = $this->model_extension_module_agentfy->getKnowledgeId($this->store_id);
-            $types = ["products", "categories", "manufacturers"];
+            $knowledgeId= $this->model_extension_module_agentfy->getKnowledgeId($this->store_id);
+            $types = ["pr oducts", "categories", "manufacturers"];
             $sourceIds = [];
             foreach ($types as $type) {
                 $sourceId = $this->model_extension_module_agentfy->getSourceId(

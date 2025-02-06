@@ -133,7 +133,10 @@ class Agentfy extends \Opencart\System\Engine\Model {
             $store_id
         );
         if (!empty($module_setting["module_agentfy_knowledge"])) {
-            return $module_setting["module_agentfy_knowledge"];
+            $response = $this->model_extension_agentfy_module_agentfy_api->getKnowledge($module_setting["module_agentfy_knowledge"], $store_id);
+            if (!empty($response)) {
+                return $module_setting["module_agentfy_knowledge"];
+            }
         }
     }
 

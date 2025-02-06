@@ -66,6 +66,8 @@ class Products extends \Opencart\System\Engine\Model {
 			$url = $this->catalog_url . $seo_url_data[0]['keyword'];
 		}
         $metadata["source"] = $url;
+		$isBestseller = $this->isBestSellerProduct($productId, $store_id, $setting['bestseller_count']);
+        $isTopseller = $this->isTopSellerProduct($productId, $store_id, $setting['topseller_count']);
 		$search = [
 			'%title%',
 			'%description%',
@@ -73,6 +75,9 @@ class Products extends \Opencart\System\Engine\Model {
 			'%price%',
 			'%quantity%',
 			'%seoUrl%',
+            '%tag%',
+			'%bestseller%',
+            '%topseller%',
 		];
 		$replace = [
 			html_entity_decode($productInfo['name'],ENT_QUOTES, 'UTF-8'),
@@ -81,6 +86,9 @@ class Products extends \Opencart\System\Engine\Model {
 			$this->currency->format($productInfo['price'], $this->config->get('config_currency')),
 			$productInfo['quantity'],
 			$url,
+            $productInfo['tag'],
+			$isBestseller ? 'Bestseller' : '',
+            $isTopseller && !$isBestseller ? 'TopSeller' : ''
 		];
 		$pageContent = [
 			html_entity_decode($productInfo['name'],ENT_QUOTES, 'UTF-8'),
@@ -171,5 +179,18 @@ class Products extends \Opencart\System\Engine\Model {
                 $this->model_extension_agentfy_module_agentfy_api->indexDocument($sourceId, $document['id'], $store_id);
             }
 		}
+	}
+
+
+    public function isBestSellerProduct($productId, $store_id = 0, $count = 100) {
+        $query = $this->db->query("SELECT op.product_id, SUM(op.quantity) AS total FROM " . DB_PREFIX . "order_product op LEFT JOIN `" . DB_PREFIX . "order` o ON (op.order_id = o.order_id) LEFT JOIN `" . DB_PREFIX . "product` p ON (op.product_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE o.order_status_id > '0' AND p.status = '1' AND p.date_available <= NOW() AND op.product_id = '".(int)$productId."' AND p2s.store_id = '" . (int)$store_id . "' GROUP BY op.product_id HAVING total > '".(int)$count."' ORDER BY total DESC LIMIT 1");
+
+		return count($query->rows) > 0;
+	}
+
+    public function isTopSellerProduct($productId, $store_id = 0, $count = 10) {
+        $query = $this->db->query("SELECT op.product_id, SUM(op.quantity) AS total FROM " . DB_PREFIX . "order_product op LEFT JOIN `" . DB_PREFIX . "order` o ON (op.order_id = o.order_id) LEFT JOIN `" . DB_PREFIX . "product` p ON (op.product_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE o.order_status_id > '0' AND p.status = '1' AND p.date_available <= NOW() AND op.product_id = '".(int)$productId."' AND p2s.store_id = '" . (int)$store_id . "' GROUP BY op.product_id HAVING total > '".(int)$count."' ORDER BY total DESC LIMIT 1");
+
+		return count($query->rows) > 0;
 	}
 }

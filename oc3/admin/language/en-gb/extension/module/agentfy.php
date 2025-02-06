@@ -20,6 +20,8 @@ $_['entry_description'] = 'Description';
 $_['entry_status']      = 'Status';
 $_['entry_name']        = 'Name';
 $_['entry_prompt']      = 'Prompt';
+$_['entry_bestseller_count'] = 'Minimum sales to qualify as Best Seller';
+$_['entry_topseller_count'] = 'Minimum sales to qualify as Top Seller';
 
 $_['text_important']   = 'Important!';
 $_['text_empty_template'] = 'If the product template is empty, indexing will not work.';
