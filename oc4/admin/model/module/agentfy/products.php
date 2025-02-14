@@ -3,20 +3,12 @@ namespace Opencart\Admin\Model\Extension\Agentfy\Module\Agentfy;
 
 class Products extends \Opencart\System\Engine\Model {
 
-    private $store_url = '';
 	private $catalog_url = '';
 
 	public function __construct($registry) {
 		parent::__construct($registry);
 
-
-		if ($this->request->server['HTTPS']) {
-            $this->store_url = HTTPS_SERVER;
-            $this->catalog_url = HTTPS_CATALOG;
-        } else {
-            $this->store_url = HTTP_SERVER;
-            $this->catalog_url = HTTP_CATALOG;
-        }
+		$this->catalog_url = HTTP_CATALOG;
 	}
 
 
