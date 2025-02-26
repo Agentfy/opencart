@@ -118,6 +118,17 @@ class Api extends \Opencart\System\Engine\Model {
 
     public function addAgent($name, $prompt, $knowledgeId, $store_id)
     {
+        $this->load->model('setting/store');
+
+        $store_info = $this->model_setting_store->getStore($store_id);
+
+        if ($store_info) {
+            $store_url = $store_info['url'];
+        } else {
+            $store_url = HTTP_CATALOG;
+        }
+        $parsedUrl = parse_url($store_url);
+        $domain = $parsedUrl['host']; 
         $response = $this->request("POST", "/agents", [
             "name" => $name,
             "prompt" => $prompt,
@@ -125,7 +136,8 @@ class Api extends \Opencart\System\Engine\Model {
             "public" => false,
             "useRerank" => false,
             "useSearchPrompt" => false,
-            "searchCount" => 0
+            "searchCount" => 0,
+            "whitelist" => $domain
         ], $store_id);
 
         return !empty($response) ? $response['data'] : null;

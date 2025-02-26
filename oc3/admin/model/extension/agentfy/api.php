@@ -6,6 +6,23 @@ class ModelExtensionAgentfyApi extends Model
     private $apiUrl = "https://api.agentfy.ai/v1";
     // private $apiUrl = 'http://localhost:3333';
 
+    private $store_url = '';
+	private $catalog_url = '';
+
+	public function __construct($registry) {
+		parent::__construct($registry);
+
+
+		if ($this->request->server['HTTPS']) {
+            $this->store_url = HTTPS_SERVER;
+            $this->catalog_url = HTTPS_CATALOG;
+        } else {
+            $this->store_url = HTTP_SERVER;
+            $this->catalog_url = HTTP_CATALOG;
+        }
+	}
+
+
     public function addSource($type, $store_id = 0)
     {
 
@@ -116,6 +133,8 @@ class ModelExtensionAgentfyApi extends Model
 
     public function addAgent($name, $prompt, $knowledgeId, $store_id)
     {
+        $parsedUrl = parse_url($this->catalog_url);
+        $domain = $parsedUrl['host']; 
         $response = $this->request("POST", "/agents", [
             "name" => $name,
             "prompt" => $prompt,
@@ -123,7 +142,8 @@ class ModelExtensionAgentfyApi extends Model
             "public" => false,
             "useRerank" => false,
             "useSearchPrompt" => false,
-            "searchCount" => 0
+            "searchCount" => 0,
+            "whitelist" => $domain
         ], $store_id);
 
         return !empty($response) ? $response['data'] : null;

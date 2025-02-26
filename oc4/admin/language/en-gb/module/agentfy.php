@@ -18,6 +18,7 @@ $_['entry_sources']     = 'Sources';
 $_['entry_agent']       = 'Agent';
 $_['entry_description'] = 'Description';
 $_['entry_status']      = 'Status';
+$_['entry_admin_only_access'] = 'Admin Only Access';
 $_['entry_name']        = 'Name';
 $_['entry_prompt']      = 'Prompt';
 $_['entry_bestseller_count'] = 'Minimum sales to qualify as Best Seller';

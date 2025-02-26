@@ -3,6 +3,7 @@ $_['module_agentfy_setting'] = array(
 	'api_key' => '',
     'api_url' => 'https://api.agentfy.ai/v1',
     'topseller_count' => 10,
+    'admin_only_access' => false,
     'bestseller_count' => 100,
     "product_template" => "# %title%\r\n%bestseller%\r\n%topseller%\r\n%description%\r\n\r\n### Attributes\r\n* Model: %model%\r\n* Image URL: %image%\r\n* Quantity: %quantity%\r\n* Product page URL: %seoUrl%\r\n* Price: %price%\r\n* Category: %categories%\r\n* Tags: %tag%\r\n* Manufacturer: %manufacturer%\r\n%attributes%",
     'category_template' => "# %title%\r\n%description%\r\n\r\n### Attributes\r\n* Category page URL: %seoUrl%",

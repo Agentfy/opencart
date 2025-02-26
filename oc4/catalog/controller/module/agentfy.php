@@ -73,6 +73,10 @@ class Agentfy extends \Opencart\System\Engine\Controller
         (array) $this->config->get("module_agentfy_setting")
       );
 
+      if ($setting['admin_only_access'] && !isset($this->session->data['user_id'])) {
+        return;
+      }
+
       $timestamp = round(microtime(true) * 1000);
       
       $this->document->addScript("https://sdk.agentfy.ai/client-latest.umd.js?t=" . $timestamp);

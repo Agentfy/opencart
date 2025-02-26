@@ -62,12 +62,16 @@ class ControllerExtensionModuleAgentFy extends Controller
       $_config = new Config();
       $_config->load("agentfy");
 
-      $config_setting = $_config->get("paypal_setting");
+      $config_setting = $_config->get("module_agentfy_setting");
 
       $setting = array_replace_recursive(
         (array) $config_setting,
         (array) $this->config->get("module_agentfy_setting")
       );
+
+      if ($setting['admin_only_access'] && !isset($this->session->data['user_id'])) {
+        return;
+      }
 
       $timestamp = round(microtime(true) * 1000);
       
