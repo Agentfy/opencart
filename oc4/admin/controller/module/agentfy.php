@@ -33,6 +33,18 @@ class Agentfy extends \Opencart\System\Engine\Controller
         $_config = new \Opencart\System\Engine\Config();
         $_config->addPath(DIR_EXTENSION . 'agentfy/system/config/');
         $_config->load('agentfy');
+
+
+        $option = [
+			'expires'  => time() + (int)$this->config->get('config_session_expire'),
+			'path'     =>  (!empty($this->request->server['PHP_SELF']) ? rtrim(dirname(dirname($this->request->server['PHP_SELF'])), '/') . '/' : '/'),
+			'secure'   => $this->request->server['HTTPS'],
+			'httponly' => false,
+			'SameSite' => $this->config->get('config_session_samesite')
+		];
+
+		setcookie($this->config->get('session_name'), $this->session->getId(), $option);
+
         
         $this->load->language("extension/agentfy/module/agentfy");
         $this->load->model("extension/agentfy/module/agentfy");

@@ -4,7 +4,12 @@ namespace Opencart\Catalog\Controller\Extension\Agentfy\Module;
 class Agentfy extends \Opencart\System\Engine\Controller
 {
   private $error = [];
-
+  public function __construct($registry) {
+    parent::__construct($registry);
+    if(!isset($this->user)){
+        $this->user = new \Opencart\System\Library\Cart\User($registry);
+    }
+}
   public function index()
   {
     $this->load->model("extension/agentfy/module/agentfy");
@@ -66,14 +71,13 @@ class Agentfy extends \Opencart\System\Engine\Controller
       $_config->addPath(DIR_EXTENSION . 'agentfy/system/config/');
       $_config->load("agentfy");
 
-      $config_setting = $_config->get("paypal_setting");
+      $config_setting = $_config->get("module_agentfy_setting");
 
       $setting = array_replace_recursive(
         (array) $config_setting,
         (array) $this->config->get("module_agentfy_setting")
       );
-
-      if ($setting['admin_only_access'] && !isset($this->session->data['user_id'])) {
+      if ($setting['admin_only_access'] && !$this->user->isLogged()) {
         return;
       }
 
