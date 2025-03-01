@@ -56,27 +56,27 @@ class ControllerExtensionModuleAgentFy extends Controller
 
   public function content_top_before($route, &$data)
   {
-    $this->load->model("extension/module/agentfy");
-
-    if ($this->config->get("module_agentfy_status")) {
-      $_config = new Config();
-      $_config->load("agentfy");
-
-      $config_setting = $_config->get("module_agentfy_setting");
-
-      $setting = array_replace_recursive(
-        (array) $config_setting,
-        (array) $this->config->get("module_agentfy_setting")
-      );
-
-      if ($setting['admin_only_access'] && !isset($this->session->data['user_id'])) {
-        return;
-      }
-
-      $timestamp = round(microtime(true) * 1000);
-      
-      $this->document->addScript("https://sdk.agentfy.ai/client-latest.umd.js?t=" . $timestamp);
-      $this->document->addScript("catalog/view/javascript/agentfy.js?t=" . $timestamp);
+      $this->load->model("extension/module/agentfy");
+  
+      if ($this->config->get("module_agentfy_status")) {
+          $_config = new Config();
+          $_config->load("agentfy");
+  
+          $config_setting = $_config->get("module_agentfy_setting");
+  
+          $setting = array_replace_recursive(
+              (array) $config_setting,
+              (array) $this->config->get("module_agentfy_setting")
+          );
+  
+          if ($setting['admin_only_access'] && !isset($this->session->data['user_id'])) {
+              return;
+          }
+  
+          $timestamp = date("Ymd");
+  
+          $this->document->addScript("https://sdk.agentfy.ai/client-latest.umd.js?t=" . $timestamp);
+          $this->document->addScript("catalog/view/javascript/agentfy.js?t=" . $timestamp);
     }
   }
 }
