@@ -4692,3 +4692,4 @@ catalog/model/extension/d_opencart_patch/user.php
 system/library/d_shopunity/extension/d_opencart_patch.json
 system/library/d_shopunity/install/d_opencart_patch.xml
 system/library/d_shopunity/readme/d_opencart_patch.md
+catalog/view/javascript/agentfy-client-latest.umd.js
