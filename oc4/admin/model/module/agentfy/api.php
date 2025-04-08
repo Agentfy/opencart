@@ -115,6 +115,16 @@ class Api extends \Opencart\System\Engine\Model {
         return null;
     }
 
+    public function addTeam($name, $codename, $store_id)
+    {
+        $response = $this->request("POST", "/teams", [
+            "name" => $name,
+            "codename" => $codename,
+        ], $store_id, "");
+
+        return !empty($response) ? $response['data'] : null;
+    }
+
 
     public function addAgent($name, $prompt, $knowledgeId, $store_id)
     {
@@ -226,6 +236,27 @@ class Api extends \Opencart\System\Engine\Model {
         }
     }
 
+    public function getTeams($search = "", $store_id = 0)
+    {
+        $response = $this->request("GET", "/teams?search=" . $search, [], $store_id, "");
+
+        if (!empty($response)) {
+            if (count($response["data"]) > 0) {
+                return $response["data"];
+            }
+        }
+    }
+
+
+    public function getTeam($id, $store_id)
+    {
+        $response = $this->request("GET", "/teams/" . $id, [], $store_id, "");
+
+        if (!empty($response["data"])) {
+            return $response["data"];
+        }
+    }
+
     public function getAgents($search = "", $store_id = 0)
     {
         $response = $this->request("GET", "/agents?search=" . $search, [], $store_id);
@@ -254,7 +285,7 @@ class Api extends \Opencart\System\Engine\Model {
             return $response["data"];
         }
     }
-    public function request($method, $url, $body = [], $store_id = 0)
+    public function request($method, $url, $body = [], $store_id = 0, $prefix="/teams/:teamId")
     {
         $this->load->model("setting/setting");
         $setting = $this->model_setting_setting->getValue("module_agentfy_setting", $store_id);
@@ -269,6 +300,10 @@ class Api extends \Opencart\System\Engine\Model {
 
         if (!empty($module_setting['api_url'])) {
             $apiUrl = $module_setting['api_url'];
+        }
+
+        if (!empty($prefix)) {
+            $url = str_replace(":teamId", $module_setting["team_id"], $prefix) . $url;
         }
 
         curl_setopt_array($curl, [

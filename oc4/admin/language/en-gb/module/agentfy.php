@@ -11,15 +11,18 @@ $_['text_sources']      = 'Sources';
 $_['text_count_documents'] = 'Count Documents';
 
 $_['button_reindex']    = 'Reindex';
+
 // Entry
 $_['entry_api_key']     = 'Api Key';
 $_['entry_api_url']     = 'Api Url';
 $_['entry_sources']     = 'Sources';
 $_['entry_agent']       = 'Agent';
+$_['entry_team']        = 'Team';
 $_['entry_description'] = 'Description';
 $_['entry_status']      = 'Status';
 $_['entry_admin_only_access'] = 'Admin Only Access';
 $_['entry_name']        = 'Name';
+$_['entry_codename']    = 'Codename';
 $_['entry_prompt']      = 'Prompt';
 $_['entry_bestseller_count'] = 'Minimum sales to qualify as Best Seller';
 $_['entry_topseller_count'] = 'Minimum sales to qualify as Top Seller';
@@ -60,8 +63,10 @@ $_['text_indexing_not_close'] = 'Please do not close this page. The indexing pro
 $_['text_installation_progress'] = 'Indexing in progress, please wait...';
 
 $_['text_modal_title'] = 'Create Agent';
+$_['text_modal_team_title'] = 'Create Team';
 
 $_['button_create_agent'] = 'Create Agent';
+$_['button_create_team'] = 'Create Team';
 $_['button_close'] = 'Close';
 // Error
 $_['success_save']		= 'Success: You have modified Agentfy.AI!';

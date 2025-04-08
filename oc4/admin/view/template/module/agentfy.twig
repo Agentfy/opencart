@@ -87,6 +87,22 @@
                                 </div>
                             </div>
                             <div class="row mb-3">
+                                <label class="col-sm-2 col-form-label" for="input-team">{{ entry_team }}</label>
+                                <div class="col-sm-10">
+                                    <div class="input-group">
+                                        <input type="text" name="team" value="{{ team }}" placeholder="{{ entry_team }}" id="input-team" dv-data-oc-target="autocomplete-team" class="form-control" autocomplete="off"/>
+                                        <ul id="autocomplete-team" class="dropdown-menu"></ul>
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#team_modal">{{ button_create_team }}</button>
+                                        </span>
+                                    </div>
+                                    <input type="hidden" name="module_agentfy_setting[team_id]" id="team_id" value="{{ module_agentfy_setting['team_id'] }}"/>
+                                    {% if error_team %}
+                                        <div class="text-danger">{{ error_team }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="row mb-3">
                                 <label class="col-sm-2 col-form-label" for="input-topseller_count">{{ entry_topseller_count }}</label>
                                 <div class="col-sm-10">
                                     <input type="text" name="module_agentfy_setting[topseller_count]" value="{{ module_agentfy_setting['topseller_count'] }}" placeholder="{{ entry_topseller_count }}" id="input-topseller_count" class="form-control"/>
@@ -376,6 +392,38 @@
             </div>
         </div>
     </div>
+    <div id="team_modal" class="modal fade">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="team_modal_label">{{text_modal_team_title}}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ createTeam }}" method="post" enctype="multipart/form-data" id="form-create-team" class="form-horizontal">
+                         <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="input-name">{{ entry_name }}</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="name" placeholder="{{ entry_name }}" id="input-name" class="form-control" value="{{store_name}}"/>
+                            </div>
+                        </div>
+                         <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="input-codename">{{ entry_codename }}</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="codename" placeholder="{{ entry_codename }}" id="input-codename" class="form-control" value=""/>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{button_close}}</button>
+                    <button type="button" class="btn btn-primary button_create_team">{{button_create_team}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <script type="text/javascript">
 $('.module-agentfy').on('input', '[name^=module_agentfy_display]', function (e) {
@@ -413,6 +461,31 @@ $('.module-agentfy').on('input', '[name^=module_agentfy_display]', function (e) 
     }
     lucide.createIcons();
 })
+$('.module-agentfy').on('click', '.button_create_team', function() {
+    $.ajax({
+        type: 'post',
+        url: $('#form-create-team').attr('action'),
+        data: $('#form-create-team').serialize(),
+        dataType: 'json',
+        success: function(json) {
+            $('.module-agentfy .alert-success').remove();
+
+            if (json['success']) {
+                $('.module-agentfy > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i><button type="button" class="close" data-dismiss="alert">&times;</button> ' + json['success'] + '</div>');
+
+                $('html, body').animate({scrollTop: $('.module-agentfy > .container-fluid .alert-success').offset().top}, 'slow');
+        $('#team_modal').modal('hide');
+        if (json['team']) {
+            $('input[name=\'module_agentfy_setting[team_id]\']').val(json['team'].id)
+            $('[name=team]').val(json['team'].name)
+        }
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+    });
+});
 $('.module-agentfy').on('click', '.button_create_agent', function() {
     $.ajax({
         type: 'post',
@@ -491,6 +564,34 @@ $('input[name=\'agent\']').ai_autocomplete({
         console.log('select',item)
         $('input[name=\'agent\']').val(item['label']);
         $('input[name=\'module_agentfy_setting[agent_id]\']').val(item['value']);
+    }
+});
+
+
+$('input[name=\'team\']').ai_autocomplete({
+    'source': function(request, response) {
+        $.ajax({
+            url: 'index.php?route=extension/agentfy/module/agentfy{{separator}}autocompleteTeams&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+            dataType: 'json',
+            success: function(json) {
+                json.unshift({
+                    team_id: 0,
+                    name: '{{ text_none }}'
+                });
+
+                response($.map(json, function(item) {
+                    return {
+                        label: item['name'],
+                        value: item['team_id']
+                    }
+                }));
+            }
+        });
+    },
+    'select': function(item) {
+        console.log('select',item)
+        $('input[name=\'team\']').val(item['label']);
+        $('input[name=\'module_agentfy_setting[team_id]\']').val(item['value']);
     }
 });
 </script>

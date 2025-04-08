@@ -75,6 +75,13 @@ class Agentfy extends \Opencart\System\Engine\Controller
         } else {
             $data["error_agent_id"] = "";
         }
+
+        if (isset($this->error["team_id"])) {
+            $data["error_team_id"] = $this->error["team_id"];
+        } else {
+            $data["error_team_id"] = "";
+        }
+
         $data['separator'] = $this->separator;
 
         $data["breadcrumbs"] = [];
@@ -122,6 +129,12 @@ class Agentfy extends \Opencart\System\Engine\Controller
 
         $data["createAgent"] = $this->url->link(
             "extension/agentfy/module/agentfy".$this->separator."createAgent",
+            "user_token=" . $this->session->data["user_token"]."&store_id=".$this->store_id,
+            true
+        );
+
+        $data["createTeam"] = $this->url->link(
+            "extension/agentfy/module/agentfy".$this->separator."createTeam",
             "user_token=" . $this->session->data["user_token"]."&store_id=".$this->store_id,
             true
         );
@@ -208,6 +221,21 @@ class Agentfy extends \Opencart\System\Engine\Controller
                 );
                 if ($result) {
                     $data["agent"] = $result["name"];
+                }
+            } catch (\Exception $e) {
+                $this->error["warning"] = $e->getMessage();
+            }
+        }
+
+        $data["team"] = "";
+        if (!empty($data["module_agentfy_setting"]["team_id"])) {
+            try {
+                $result = $this->model_extension_agentfy_module_agentfy_api->getTeam(
+                    $data["module_agentfy_setting"]["team_id"],
+                    $this->store_id
+                );
+                if ($result) {
+                    $data["team"] = $result["name"];
                 }
             } catch (\Exception $e) {
                 $this->error["warning"] = $e->getMessage();
@@ -421,6 +449,38 @@ class Agentfy extends \Opencart\System\Engine\Controller
                 $data["agent"] = $agent;
                 $data["success"] = $this->language->get("success_save");
             }
+        }
+
+        $data["error"] = $this->error;
+
+        $this->response->addHeader("Content-Type: application/json");
+        $this->response->setOutput(json_encode($data));
+    }
+
+    public function createTeam()
+    {
+        $this->load->language("extension/agentfy/module/agentfy");
+        $this->load->model("extension/agentfy/module/agentfy");
+        $this->load->model("extension/agentfy/module/agentfy/api");
+
+        if (!$this->user->hasPermission("modify", "extension/agentfy/module/agentfy")) {
+            $this->response->setOutput(
+                json_encode(["error" => $this->language->get("error_permission")])
+            );
+            return;
+        }
+
+        $name = $this->request->post["name"];
+        $codename = $this->request->post["codename"];
+
+        $team = $this->model_extension_agentfy_module_agentfy_api->addTeam(
+            $name,
+            $codename,
+            $this->store_id
+        );
+        if (!empty($team)) {
+            $data["team"] = $team;
+            $data["success"] = $this->language->get("success_save");
         }
 
         $data["error"] = $this->error;
@@ -673,6 +733,55 @@ class Agentfy extends \Opencart\System\Engine\Controller
 
         return !$this->error;
     }
+
+
+    public function autocompleteTeams()
+    {
+        $json = [];
+
+        if (isset($this->request->get["filter_name"])) {
+            $this->load->model("extension/agentfy/module/agentfy/api");
+
+            $filter_data = [
+                "filter_name" => $this->request->get["filter_name"],
+                "sort" => "name",
+                "order" => "ASC",
+                "start" => 0,
+                "limit" => 5,
+            ];
+
+            $results = $this->model_extension_agentfy_module_agentfy_api->getTeams(
+                $filter_data["filter_name"],
+                $this->store_id
+            );
+            if ($results) {
+                foreach ($results as $result) {
+                    $json[] = [
+                        "team_id" => $result["id"],
+                        "name" => strip_tags(
+                            html_entity_decode(
+                                $result["name"],
+                                ENT_QUOTES,
+                                "UTF-8"
+                            )
+                        ),
+                    ];
+                }
+            }
+        }
+
+        $sort_order = [];
+
+        foreach ($json as $key => $value) {
+            $sort_order[$key] = $value["name"];
+        }
+
+        array_multisort($sort_order, SORT_ASC, $json);
+
+        $this->response->addHeader("Content-Type: application/json");
+        $this->response->setOutput(json_encode($json));
+    }
+
 
     public function autocompleteAgents()
     {
