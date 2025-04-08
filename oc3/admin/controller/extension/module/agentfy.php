@@ -48,6 +48,12 @@ class ControllerExtensionModuleAgentfy extends Controller
             $data["error_agent_id"] = "";
         }
 
+        if (isset($this->error["team_id"])) {
+            $data["error_team_id"] = $this->error["team_id"];
+        } else {
+            $data["error_team_id"] = "";
+        }
+
         $data["breadcrumbs"] = [];
 
         $data["breadcrumbs"][] = [
@@ -93,6 +99,12 @@ class ControllerExtensionModuleAgentfy extends Controller
 
         $data["createAgent"] = $this->url->link(
             "extension/module/agentfy/createAgent",
+            "user_token=" . $this->session->data["user_token"]."&store_id=".$this->store_id,
+            true
+        );
+
+        $data["createTeam"] = $this->url->link(
+            "extension/module/agentfy/createTeam",
             "user_token=" . $this->session->data["user_token"]."&store_id=".$this->store_id,
             true
         );
@@ -170,6 +182,32 @@ class ControllerExtensionModuleAgentfy extends Controller
         }
         $data["agent"] = "";
         if (!empty($data["module_agentfy_setting"]["agent_id"])) {
+            try {
+                $result = $this->model_extension_agentfy_api->getAgent(
+                    $data["module_agentfy_setting"]["agent_id"],
+                    $this->store_id
+                );
+                if ($result) {
+                    $data["agent"] = $result["name"];
+                }
+            } catch (\Exception $e) {
+                $this->error["warning"] = $e->getMessage();
+            }
+        }
+
+        $data["team"] = "";
+        if (!empty($data["module_agentfy_setting"]["team_id"])) {
+            try {
+                $result = $this->model_extension_agentfy_api->getTeam(
+                    $data["module_agentfy_setting"]["team_id"],
+                    $this->store_id
+                );
+                if ($result) {
+                    $data["team"] = $result["name"];
+                }
+            } catch (\Exception $e) {
+                $this->error["warning"] = $e->getMessage();
+            }
             try {
                 $result = $this->model_extension_agentfy_api->getAgent(
                     $data["module_agentfy_setting"]["agent_id"],
@@ -391,6 +429,39 @@ class ControllerExtensionModuleAgentfy extends Controller
                 $data["agent"] = $agent;
                 $data["success"] = $this->language->get("success_save");
             }
+        }
+
+        $data["error"] = $this->error;
+
+        $this->response->addHeader("Content-Type: application/json");
+        $this->response->setOutput(json_encode($data));
+    }
+
+
+    public function createTeam()
+    {
+        $this->load->language("extension/module/agentfy");
+        $this->load->model("extension/module/agentfy");
+        $this->load->model("extension/agentfy/api");
+
+        if (!$this->user->hasPermission("modify", "extension/module/agentfy")) {
+            $this->response->setOutput(
+                json_encode(["error" => $this->language->get("error_permission")])
+            );
+            return;
+        }
+
+        $name = $this->request->post["name"];
+        $codename = $this->request->post["codename"];
+
+        $team = $this->model_extension_agentfy_api->addTeam(
+            $name,
+            $codename,
+            $this->store_id
+        );
+        if (!empty($team)) {
+            $data["team"] = $team;
+            $data["success"] = $this->language->get("success_save");
         }
 
         $data["error"] = $this->error;
@@ -673,6 +744,54 @@ class ControllerExtensionModuleAgentfy extends Controller
                 foreach ($results as $result) {
                     $json[] = [
                         "agent_id" => $result["id"],
+                        "name" => strip_tags(
+                            html_entity_decode(
+                                $result["name"],
+                                ENT_QUOTES,
+                                "UTF-8"
+                            )
+                        ),
+                    ];
+                }
+            }
+        }
+
+        $sort_order = [];
+
+        foreach ($json as $key => $value) {
+            $sort_order[$key] = $value["name"];
+        }
+
+        array_multisort($sort_order, SORT_ASC, $json);
+
+        $this->response->addHeader("Content-Type: application/json");
+        $this->response->setOutput(json_encode($json));
+    }
+
+
+    public function autocompleteTeams()
+    {
+        $json = [];
+
+        if (isset($this->request->get["filter_name"])) {
+            $this->load->model("extension/agentfy/api");
+
+            $filter_data = [
+                "filter_name" => $this->request->get["filter_name"],
+                "sort" => "name",
+                "order" => "ASC",
+                "start" => 0,
+                "limit" => 5,
+            ];
+
+            $results = $this->model_extension_agentfy_api->getTeams(
+                $filter_data["filter_name"],
+                $this->store_id
+            );
+            if ($results) {
+                foreach ($results as $result) {
+                    $json[] = [
+                        "team_id" => $result["id"],
                         "name" => strip_tags(
                             html_entity_decode(
                                 $result["name"],

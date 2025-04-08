@@ -25,7 +25,6 @@ class ModelExtensionAgentfyApi extends Model
 
     public function addSource($type, $store_id = 0)
     {
-
         $this->load->model('setting/store');
         $store = $this->model_setting_store->getStore($store_id);
 
@@ -149,6 +148,18 @@ class ModelExtensionAgentfyApi extends Model
         return !empty($response) ? $response['data'] : null;
     }
 
+    public function addTeam($name, $codename, $store_id)
+    {
+        $parsedUrl = parse_url($this->catalog_url);
+        $domain = $parsedUrl['host']; 
+        $response = $this->request("POST", "/teams", [
+            "name" => $name,
+            "codename" => $codename,
+        ], $store_id, "");
+
+        return !empty($response) ? $response['data'] : null;
+    }
+
     public function addDocument($sourceId, $externalId, $name, $pageContent, $metadata = [], $store_id = 0)
     {
         return $this->request("POST", "/sources/" . $sourceId . "/documents", [
@@ -231,6 +242,27 @@ class ModelExtensionAgentfyApi extends Model
         }
     }
 
+    public function getTeams($search = "", $store_id = 0)
+    {
+        $response = $this->request("GET", "/teams?search=" . $search, [], $store_id, "");
+
+        if (!empty($response)) {
+            if (count($response["data"]) > 0) {
+                return $response["data"];
+            }
+        }
+    }
+
+
+    public function getTeam($id, $store_id)
+    {
+        $response = $this->request("GET", "/teams/" . $id, [], $store_id, "");
+
+        if (!empty($response["data"])) {
+            return $response["data"];
+        }
+    }
+
     public function getAgents($search = "", $store_id = 0)
     {
         $response = $this->request("GET", "/agents?search=" . $search, [], $store_id);
@@ -260,7 +292,7 @@ class ModelExtensionAgentfyApi extends Model
         }
     }
 
-    public function request($method, $url, $body = [], $store_id = 0)
+    public function request($method, $url, $body = [], $store_id = 0, $prefix="/teams/:teamId")
     {
         $this->load->model("setting/setting");
         $setting = $this->model_setting_setting->getSettingValue("module_agentfy_setting", $store_id);
@@ -273,8 +305,13 @@ class ModelExtensionAgentfyApi extends Model
 
         $apiUrl = $this->apiUrl;
 
+
         if (!empty($module_setting["api_url"])) {
             $apiUrl = $module_setting["api_url"];
+        }
+
+        if (!empty($prefix)) {
+            $url = str_replace(":teamId", $module_setting["team_id"], $prefix) . $url;
         }
         curl_setopt_array($curl, [
             CURLOPT_URL => $apiUrl . $url,
