@@ -94,7 +94,7 @@ class Agentfy extends \Opencart\System\Engine\Controller
         return;
       }
       
-      $this->document->addScript("extension/agentfy/catalog/view/javascript/agentfy.js?t=" . $timestamp);
+      $this->document->addScript("extension/agentfy/catalog/view/javascript/agentfy.js" );
 
     }
   }
