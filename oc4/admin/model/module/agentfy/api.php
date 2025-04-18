@@ -115,6 +115,28 @@ class Api extends \Opencart\System\Engine\Model {
         return null;
     }
 
+
+    public function updateAgentPrompt($id, $team_id, $prompt, $store_id)
+    {
+        $agent = $this->getAgent($id, $store_id);
+        if (empty($agent)) {
+            return null;
+        }
+        $response = $this->request("PUT", "/agents/" . $id, [
+            "name" => $agent['name'],
+            "prompt" => $prompt,
+            "knowledgeId" => $agent['knowledgeId'],
+            "public" => $agent['public'],
+            "useRerank" => $agent['useRerank'],
+            "useSearchPrompt" => $agent['useSearchPrompt'],
+            "searchCount" => $agent['searchCount'],
+            "whitelist" => $agent['whitelist'],
+        ], $store_id);
+
+        return !empty($response) ? $response['data'] : null;
+    }
+
+
     public function addTeam($name, $codename, $store_id)
     {
         $response = $this->request("POST", "/teams", [
@@ -302,7 +324,7 @@ class Api extends \Opencart\System\Engine\Model {
             $apiUrl = $module_setting['api_url'];
         }
 
-        if (!empty($prefix)) {
+        if (!empty($prefix) && !empty($module_setting["team_id"])) {
             $url = str_replace(":teamId", $module_setting["team_id"], $prefix) . $url;
         }
 

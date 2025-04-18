@@ -183,7 +183,7 @@
                                 <label class="col-sm-2 control-label" for="input-agent">{{ entry_agent }}</label>
                                 <div class="col-sm-10">
                                     <div class="input-group">
-                                        <input type="text" name="agent" value="{{ agent }}" placeholder="{{ entry_agent }}" id="input-agent" class="form-control"/>
+                                        <input type="text" name="agent" value="{{ agent.name }}" placeholder="{{ entry_agent }}" id="input-agent" class="form-control"/>
                                         <span class="input-group-btn">
                                             <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#agent_modal">{{ button_create_agent }}</button>
                                         </span>
@@ -194,6 +194,14 @@
                                     {% endif %}
                                 </div>
                             </div>
+                            {% if module_agentfy_setting['agent_id'] %}
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label" for="input-agent-prompt">{{ entry_agent_prompt }}</label>
+                                <div class="col-sm-10">
+                                    <textarea rows="20" name="agent_prompt" id="input-agent-prompt" class="form-control">{{ agent.prompt }}</textarea>
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
                         {% if module_agentfy_setting['api_key'] %}
                         <div class="tab-pane" id="tab-display">

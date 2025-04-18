@@ -148,6 +148,29 @@ class ModelExtensionAgentfyApi extends Model
         return !empty($response) ? $response['data'] : null;
     }
 
+    public function updateAgentPrompt($id, $team_id, $prompt, $store_id)
+    {
+        $agent = $this->getAgent($id, $store_id);
+        if (empty($agent)) {
+            return null;
+        }
+        $parsedUrl = parse_url($this->catalog_url);
+        $domain = $parsedUrl['host']; 
+        $response = $this->request("PUT", "/agents/" . $id, [
+            "name" => $agent['name'],
+            "prompt" => $prompt,
+            "knowledgeId" => $agent['knowledgeId'],
+            "public" => $agent['public'],
+            "useRerank" => $agent['useRerank'],
+            "useSearchPrompt" => $agent['useSearchPrompt'],
+            "searchCount" => $agent['searchCount'],
+            "whitelist" => $agent['whitelist'],
+        ], $store_id);
+
+        return !empty($response) ? $response['data'] : null;
+    }
+
+
     public function addTeam($name, $codename, $store_id)
     {
         $parsedUrl = parse_url($this->catalog_url);

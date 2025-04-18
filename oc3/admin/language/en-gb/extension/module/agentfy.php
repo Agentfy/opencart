@@ -15,6 +15,7 @@ $_['button_reindex']    = 'Reindex';
 $_['entry_api_key']     = 'Api Key';
 $_['entry_api_url']     = 'Api Url';
 $_['entry_sources']     = 'Sources';
+$_['entry_agent_prompt']     = 'Agent Prompt';
 $_['entry_agent']       = 'Agent';
 $_['entry_team']        = 'Team';
 $_['entry_description'] = 'Description';

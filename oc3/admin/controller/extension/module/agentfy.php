@@ -180,7 +180,7 @@ class ControllerExtensionModuleAgentfy extends Controller
                 );
             }
         }
-        $data["agent"] = "";
+        $data["agent"] = ["name" => "", "prompt" => ""];
         if (!empty($data["module_agentfy_setting"]["agent_id"])) {
             try {
                 $result = $this->model_extension_agentfy_api->getAgent(
@@ -188,7 +188,7 @@ class ControllerExtensionModuleAgentfy extends Controller
                     $this->store_id
                 );
                 if ($result) {
-                    $data["agent"] = $result["name"];
+                    $data["agent"] = $result;
                 }
             } catch (\Exception $e) {
                 $this->error["warning"] = $e->getMessage();
@@ -214,7 +214,7 @@ class ControllerExtensionModuleAgentfy extends Controller
                     $this->store_id
                 );
                 if ($result) {
-                    $data["agent"] = $result["name"];
+                    $data["agent"] = $result;
                 }
             } catch (\Exception $e) {
                 $this->error["warning"] = $e->getMessage();
@@ -274,6 +274,7 @@ class ControllerExtensionModuleAgentfy extends Controller
     public function save()
     {
         $this->load->language("extension/module/agentfy");
+        $this->load->model("extension/agentfy/api");
         $this->load->model("extension/module/agentfy");
 
         $this->load->model("setting/setting");
@@ -293,6 +294,15 @@ class ControllerExtensionModuleAgentfy extends Controller
                 $setting,
                 $this->store_id
             );
+
+            if (!empty($this->request->post["module_agentfy_setting"]["agent_id"])) {
+                $this->model_extension_agentfy_api->updateAgentPrompt(
+                    $this->request->post["module_agentfy_setting"]["agent_id"],
+                    $this->request->post["module_agentfy_setting"]["team_id"],
+                    $this->request->post["agent_prompt"], 
+                    $this->store_id
+                );
+            }
 
             $this->model_extension_module_agentfy->uninstallEvents();
             if (!empty($setting["module_agentfy_status"])) {

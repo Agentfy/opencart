@@ -17,7 +17,10 @@
             // Focus out
             $(element).on('focusout', function (e) {
                 if (!e.relatedTarget || !$(e.relatedTarget).hasClass('dropdown-item')) {
-                    $dropdown.removeClass('show');
+                    // $dropdown.removeClass('show');
+                    window.setTimeout(function () {
+                        $dropdown.removeClass('show');
+                    }, 1000);
                 }
             });
 

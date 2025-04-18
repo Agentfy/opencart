@@ -9,10 +9,29 @@ var AgentFy = (function () {
             dataType: 'json',
             success: function (json) {
                 console.log(json['agentId']);
-                agentfy({
-                    agentId: json['agentId'],
-                    ...json['options']
-                })
+
+                if (json['agentfy_client']) {
+                    var script = document.createElement('script');
+                    script.src = json['agentfy_client'];
+                    script.type = 'text/javascript';
+                    script.async = true;
+
+                    // Execute agentfy({...}) after the script is loaded
+                    script.onload = function () {
+                        agentfy({
+                            agentId: json['agentId'],
+                            ...json['options']
+                        });
+                    };
+
+                    document.head.appendChild(script);
+                } else {
+                    // Fallback if no script URL is provided
+                    agentfy({
+                        agentId: json['agentId'],
+                        ...json['options']
+                    });
+                }
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
@@ -25,7 +44,8 @@ var AgentFy = (function () {
     };
 }());
 
-(function(){
-    AgentFy.init()  
-  })()
-  
+(function () {
+    setTimeout(() => {
+        AgentFy.init()
+    }, 2000);
+})();

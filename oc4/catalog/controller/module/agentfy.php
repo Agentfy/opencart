@@ -55,6 +55,19 @@ class Agentfy extends \Opencart\System\Engine\Controller
     }
 
 
+    $timestamp = date("Ymd");
+      
+    $nowDate = new \DateTime();
+
+    if (empty($setting['last_update_client']) || (!empty($setting['last_update_client']) && ($nowDate->getTimestamp() - $setting['last_update_client']) > 86400)) {
+      file_put_contents(DIR_EXTENSION.'agentfy/catalog/view/javascript/agentfy-client-latest.umd.js', file_get_contents("https://sdk.agentfy.ai/client-latest.umd.js"));
+      $setting['last_update_client'] = $nowDate->getTimestamp();
+      $this->model_extension_agentfy_module_agentfy->editSettingValue('module_agentfy', 'module_agentfy_setting', $setting);
+    }
+
+    $data['agentfy_client'] = "extension/agentfy/catalog/view/javascript/agentfy-client-latest.umd.js?t=" . $timestamp;
+
+
     $data['options']= $settingDisplay;
 
     $data["error"] = $this->error;
@@ -81,18 +94,7 @@ class Agentfy extends \Opencart\System\Engine\Controller
         return;
       }
       
-      $timestamp = date("Ymd");
-      
-      $nowDate = new \DateTime();
-
-      if (empty($setting['last_update_client']) || (!empty($setting['last_update_client']) && ($nowDate->getTimestamp() - $setting['last_update_client']) > 86400)) {
-        file_put_contents(DIR_EXTENSION.'agentfy/catalog/view/javascript/agentfy-client-latest.umd.js', file_get_contents("https://sdk.agentfy.ai/client-latest.umd.js"));
-        $setting['last_update_client'] = $nowDate->getTimestamp();
-        $this->model_extension_agentfy_module_agentfy->editSettingValue('module_agentfy', 'module_agentfy_setting', $setting);
-      }
-      
-      $this->document->addScript("extension/agentfy/catalog/view/javascript/agentfy-client-latest.umd.js?t=" . $timestamp);
-           $this->document->addScript("extension/agentfy/catalog/view/javascript/agentfy.js?t=" . $timestamp);
+      $this->document->addScript("extension/agentfy/catalog/view/javascript/agentfy.js?t=" . $timestamp);
 
     }
   }

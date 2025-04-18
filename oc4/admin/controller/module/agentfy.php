@@ -212,7 +212,7 @@ class Agentfy extends \Opencart\System\Engine\Controller
                 );
             }
         }
-        $data["agent"] = "";
+        $data["agent"] = ["name" => "", "prompt" => ""];
         if (!empty($data["module_agentfy_setting"]["agent_id"])) {
             try {
                 $result = $this->model_extension_agentfy_module_agentfy_api->getAgent(
@@ -220,7 +220,7 @@ class Agentfy extends \Opencart\System\Engine\Controller
                     $this->store_id
                 );
                 if ($result) {
-                    $data["agent"] = $result["name"];
+                    $data["agent"] = $result;
                 }
             } catch (\Exception $e) {
                 $this->error["warning"] = $e->getMessage();
@@ -294,6 +294,7 @@ class Agentfy extends \Opencart\System\Engine\Controller
     {
         $this->load->language("extension/agentfy/module/agentfy");
         $this->load->model("extension/agentfy/module/agentfy");
+        $this->load->model("extension/agentfy/module/agentfy/api");
 
         $this->load->model("setting/setting");
 
@@ -312,6 +313,16 @@ class Agentfy extends \Opencart\System\Engine\Controller
                 $setting,
                 $this->store_id
             );
+
+
+            if (!empty($this->request->post["module_agentfy_setting"]["agent_id"])) {
+                $this->model_extension_agentfy_module_agentfy_api->updateAgentPrompt(
+                    $this->request->post["module_agentfy_setting"]["agent_id"],
+                    $this->request->post["module_agentfy_setting"]["team_id"],
+                    $this->request->post["agent_prompt"], 
+                    $this->store_id
+                );
+            }
 
             $this->model_extension_agentfy_module_agentfy->uninstallEvents();
             if (!empty($setting["module_agentfy_status"])) {

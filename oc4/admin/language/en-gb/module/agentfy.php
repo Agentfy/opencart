@@ -21,6 +21,7 @@ $_['entry_team']        = 'Team';
 $_['entry_description'] = 'Description';
 $_['entry_status']      = 'Status';
 $_['entry_admin_only_access'] = 'Admin Only Access';
+$_['entry_agent_prompt']     = 'Agent Prompt';
 $_['entry_name']        = 'Name';
 $_['entry_codename']    = 'Codename';
 $_['entry_prompt']      = 'Prompt';
