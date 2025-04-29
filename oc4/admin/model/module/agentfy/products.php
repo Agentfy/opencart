@@ -44,8 +44,17 @@ class Products extends \Opencart\System\Engine\Model {
         );
 		$setting = $module_setting["module_agentfy_setting"];
         
-		$template = $setting['product_template'];
-		
+
+        if (!$setting['index_out_of_stock'] && $productInfo['quantity'] <= 0) {
+            return;
+        }
+
+        if (!$setting['index_disabled_products'] && $productInfo['status'] == 0) {
+            return;
+        }
+
+        $template = $setting['product_template'];
+
         if (empty($template)) {
             throw new \Exception("Product Template is empty");
             return;

@@ -48,6 +48,9 @@ class ControllerExtensionModuleAgentFy extends Controller
 
     $data['options']= $settingDisplay;
 
+    if (!empty($data['options']['welcomeMessage'])) {
+        $data['options']['welcomeMessage'] = $data['options']['welcomeMessage'][$this->config->get('config_language_id')];
+    }
 
     $timestamp = round(microtime(true) * 1000);
     $nowDate = new DateTime();
@@ -84,6 +87,7 @@ class ControllerExtensionModuleAgentFy extends Controller
       if ($setting['admin_only_access'] && !isset($this->session->data['user_id'])) {
         return;
       }
+      $timestamp = round(microtime(true) * 1000);
 
       $this->document->addScript("catalog/view/javascript/agentfy.js?t=" . $timestamp);
     }

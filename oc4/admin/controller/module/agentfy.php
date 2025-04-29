@@ -280,6 +280,10 @@ class Agentfy extends \Opencart\System\Engine\Controller
             $data["module_agentfy_status"] = $setting;
         }
 
+        $this->load->model('localisation/language');
+
+        $data['languages'] = $this->model_localisation_language->getLanguages();
+
         $data["prompt"] = $this->model_extension_agentfy_module_agentfy->getPrompt($this->store_id);
         $data["header"] = $this->load->controller("common/header");
         $data["column_left"] = $this->load->controller("common/column_left");

@@ -20,6 +20,8 @@ $_['entry_agent']       = 'Agent';
 $_['entry_team']        = 'Team';
 $_['entry_description'] = 'Description';
 $_['entry_status']      = 'Status';
+$_['entry_index_out_of_stock'] = 'Index Out of Stock';
+$_['entry_index_disabled_products'] = 'Index Disabled Products';
 $_['entry_admin_only_access'] = 'Admin Only Access';
 $_['entry_name']        = 'Name';
 $_['entry_codename']    = 'Codename';
@@ -36,6 +38,7 @@ $_['tab_display']       = 'Display';
 $_['tab_general']       = 'General';
 $_['tab_catalog']       = 'Agent';
 
+$_['entry_welcome_message'] = 'Welcome Message';
 $_['entry_button_name'] = 'Button Title';
 $_['entry_button_icon'] = 'Button Icon';
 $_['entry_button_color'] = 'Button Color';

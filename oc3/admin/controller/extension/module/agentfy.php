@@ -260,6 +260,10 @@ class ControllerExtensionModuleAgentfy extends Controller
             );
         }
 
+		$this->load->model('localisation/language');
+
+		$data['languages'] = $this->model_localisation_language->getLanguages();
+
         $data["prompt"] = $this->model_extension_module_agentfy->getPrompt($this->store_id);
 
         $data["header"] = $this->load->controller("common/header");

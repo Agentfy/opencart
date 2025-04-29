@@ -129,6 +129,24 @@
                                     </div>
                                 </div>
                             </div>
+                                                        <div class="row mb-3">
+                                <label class="col-sm-2 col-form-label" for="input-index_out_of_stock">{{ entry_index_out_of_stock }}</label>
+                                <div class="col-sm-10">
+                                    <div class="form-check form-switch form-switch-lg">
+                                        <input type="hidden" name="module_agentfy_setting[index_out_of_stock]" value="0">
+                                        <input type="checkbox" name="module_agentfy_setting[index_out_of_stock]" value="1" id="input-status" class="form-check-input" {% if module_agentfy_setting['index_out_of_stock'] %} checked{% endif %}>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-2 col-form-label" for="input-index_disabled_products">{{ entry_index_disabled_products }}</label>
+                                <div class="col-sm-10">
+                                    <div class="form-check form-switch form-switch-lg">
+                                        <input type="hidden" name="module_agentfy_setting[index_disabled_products]" value="0">
+                                        <input type="checkbox" name="module_agentfy_setting[index_disabled_products]" value="1" id="input-status" class="form-check-input" {% if module_agentfy_setting['index_disabled_products'] %} checked{% endif %}>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="row mb-3">
                                 <label class="col-sm-2 col-form-label" for="input-admin_only_access">{{ entry_admin_only_access }}</label>
                                 <div class="col-sm-10">
@@ -209,6 +227,15 @@
                                     </div>
                                 </div>
                                 <div class="col-sm-8">
+                                    <div class="row mb-3">
+                                    <label class="col-sm-2 col-form-label" for="input-welcome-message">{{ entry_welcome_message }}</label>
+                                    <div class="col-sm-10">
+                                        {% for language in languages %}
+                                            <div class="input-group"><span class="input-group-text"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}"/></span> <input type="text" name="module_agentfy_display[welcomeMessage][{{ language.language_id }}]" rows="5" placeholder="{{ entry_text }}" class="form-control" value="{{ module_agentfy_display.welcomeMessage[language.language_id] ? module_agentfy_display.welcomeMessage[language.language_id] }}"/>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    </div>
                                     <div class="row mb-3">
                                         <label class="col-sm-2 col-form-label" for="input-button-name">{{ entry_button_name }}</label>
                                         <div class="col-sm-10">
@@ -742,7 +769,7 @@ $('input[name=\'team\']').ai_autocomplete({
 
     .agentfy-form-inline .form-control {
       display: inline-block;
-      width: auto; // Prevent labels from stacking above inputs in `.form-group`
+      width: auto; // Prevent labels from stacking above inputs in `.row mb-3`
       vertical-align: middle;
     }
 </style>

@@ -70,6 +70,10 @@ class Agentfy extends \Opencart\System\Engine\Controller
 
     $data['options']= $settingDisplay;
 
+    if (!empty($data['options']['welcomeMessage'])) {
+      $data['options']['welcomeMessage'] = $data['options']['welcomeMessage'][$this->config->get('config_language_id')];
+  }
+
     $data["error"] = $this->error;
 
     $this->response->addHeader("Content-Type: application/json");

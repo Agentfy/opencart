@@ -20,6 +20,8 @@ $_['entry_agent']       = 'Agent';
 $_['entry_team']        = 'Team';
 $_['entry_description'] = 'Description';
 $_['entry_status']      = 'Status';
+$_['entry_index_out_of_stock'] = 'Index Out of Stock';
+$_['entry_index_disabled_products'] = 'Index Disabled Products';
 $_['entry_admin_only_access'] = 'Admin Only Access';
 $_['entry_agent_prompt']     = 'Agent Prompt';
 $_['entry_name']        = 'Name';
@@ -37,6 +39,7 @@ $_['text_important']   = 'Important!';
 $_['text_empty_template'] = 'If the product template is empty, indexing will not work.';
 $_['text_api_key']      = 'To begin, please create an account on <a href="https://agentfy.ai" target="_blank">Agentfy.ai</a>. Once registered, navigate to the dashboard to generate your <a href="https://agentfy.ai/apiKeys" target="_blank">API Key</a>.';
 
+$_['entry_welcome_message'] = 'Welcome Message';
 $_['entry_button_name'] = 'Button Title';
 $_['entry_button_icon'] = 'Button Icon';
 $_['entry_button_color'] = 'Button Color';
