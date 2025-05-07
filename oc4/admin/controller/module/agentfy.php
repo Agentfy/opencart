@@ -26,6 +26,25 @@ class Agentfy extends \Opencart\System\Engine\Controller
 
         $this->load->model('setting/store');
         $this->store = $this->model_setting_store->getStore($this->store_id);
+        $this->load->model("extension/agentfy/module/agentfy/api");
+        $previousExceptionHandler = set_exception_handler(function ($exception) use (&$previousExceptionHandler) {
+            if ($exception instanceof Throwable || $exception instanceof Exception) {
+                $this->model_extension_agentfy_module_agentfy_api->sendSentryError($exception);
+            }
+
+            if ($previousExceptionHandler) {
+                call_user_func($previousExceptionHandler, $exception);
+            } else {
+                throw $exception;
+            }
+        });
+
+        $previousErrorHandler = set_error_handler(function ($errno, $errstr, $errfile, $errline) use (&$previousErrorHandler) {
+            $exception = new \ErrorException($errstr, 0, $errno, $errfile, $errline);
+            $this->model_extension_agentfy_module_agentfy_api->sendSentryError($exception);
+
+            return false;
+        });
     }
 
     public function index()
@@ -346,6 +365,7 @@ class Agentfy extends \Opencart\System\Engine\Controller
     {
         $this->load->model("extension/agentfy/module/agentfy");
         $this->load->model("extension/agentfy/module/agentfy/products");
+        
         $productId = $output;
         $sourceId = $this->model_extension_agentfy_module_agentfy->getSourceId(
             "products",

@@ -358,6 +358,10 @@ class ModelExtensionAgentfyApi extends Model
         $response = curl_exec($curl);
         $status = curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
         $errors = curl_error($curl);
+        $responseContent = array();
+        if (!empty($response)) {
+            $responseContent = json_decode($response, true);
+        }
         if ($status == 403) {
             throw new Exception("Invalid API key");
             return;
@@ -366,20 +370,108 @@ class ModelExtensionAgentfyApi extends Model
             throw new Exception("Invalid API key");
             return;
         }
-        if (!empty($response['error'])) {
-            throw new Exception($response['error']);
+        if (!empty($responseContent['error'])) {
+            $this->sendSentryError(new Exception($responseContent['error']), 'error', [
+                'url' => $apiUrl . $url,
+                'method' => $method,
+                'headers' => [
+                    "Content-Type" => "application/json",
+                    "api-key" => $module_setting["api_key"],
+                ],
+                'data' => $body,
+            ]);
+            throw new Exception($responseContent['error']);
 
         }
         if (!empty($errors)) {
+            $this->sendSentryError(new Exception($errors), 'error', [
+                'url' => $apiUrl . $url,
+                'method' => $method,
+                'headers' => [
+                    "Content-Type" => "application/json",
+                    "api-key" => $module_setting["api_key"],
+                ],
+                'data' => $body,
+            ]);
             throw new Exception($errors);
         }
 
         if (!empty($response)) {
-            $responseContent = json_decode($response, true);
-
             curl_close($curl);
             return !empty($responseContent) ? $responseContent : null;
         }
         return;
+    }
+    public function sendSentryError($exception, $level = 'error', $request = null){
+        $publicKey = '74fe15f733831993b4a2c35f8e0d7a47';
+        $projectId = '4509249648787536';
+        $sentryHost = 'https://o4509133849034752.ingest.de.sentry.io';
+    
+        $eventId = bin2hex(random_bytes(16));
+        $timestamp = time();
+        $url = "$sentryHost/api/$projectId/envelope/";
+    
+        $authHeader = "Sentry sentry_version=7, sentry_client=custom-php/1.0, sentry_key=$publicKey";
+    
+        $headers = [
+            'Content-Type: application/x-sentry-envelope',
+            "X-Sentry-Auth: $authHeader"
+        ];
+    
+        $stacktrace = [];
+        foreach ($exception->getTrace() as $frame) {
+            $stacktrace[] = [
+                'filename' => $frame['file'] ?? '[internal]',
+                'function' => $frame['function'] ?? '',
+                'lineno' => $frame['line'] ?? 0,
+                'module' => $frame['class'] ?? '',
+            ];
+        }
+    
+        $exceptionBlock = [
+            'values' => [[
+                'type' => get_class($exception),
+                'value' => $exception->getMessage(),
+                'stacktrace' => ['frames' => array_reverse($stacktrace)],
+            ]]
+        ];
+    
+        $eventPayload = json_encode([
+            'event_id' => $eventId,
+            'timestamp' => gmdate('c'),
+            'level' => $level,
+            'platform' => 'php',
+            'logger' => 'custom-opencart',
+            'exception' => $exceptionBlock,
+            'message' => ['formatted' => $exception->getMessage()],
+            'server_name' => $_SERVER['SERVER_NAME'] ?? 'cli',
+            'environment' => 'production',
+            'request' => $request,
+        ]);
+    
+        $envelopeHeader = json_encode([
+            'event_id' => $eventId,
+            'sent_at' => gmdate('c'),
+        ]);
+    
+        $itemHeader = json_encode([
+            'type' => 'event'
+        ]);
+    
+        $body = implode("\n", [$envelopeHeader, $itemHeader, $eventPayload]);
+    
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    
+        $response = curl_exec($ch);
+        
+        if (curl_errno($ch)) {
+            error_log('Sentry error: ' . curl_error($ch));
+        }
+    
+        curl_close($ch);
     }
 }
