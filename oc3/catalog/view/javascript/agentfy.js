@@ -20,6 +20,7 @@ var AgentFy = (function () {
                     script.onload = function () {
                         agentfy({
                             agentId: json['agentId'],
+                            apiKey: json['code'],
                             ...json['options']
                         });
                     };
@@ -29,6 +30,7 @@ var AgentFy = (function () {
                     // Fallback if no script URL is provided
                     agentfy({
                         agentId: json['agentId'],
+                        apiKey: json['code'],
                         ...json['options']
                     });
                 }
