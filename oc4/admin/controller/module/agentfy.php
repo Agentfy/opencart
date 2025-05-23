@@ -71,7 +71,7 @@ class Agentfy extends \Opencart\System\Engine\Controller
 
 
         $this->document->addScript(HTTP_CATALOG.'extension/agentfy/admin/view/javascript/agentfy/ai_autocomplete.js');
-        $this->document->setTitle($this->language->get("heading_title"));
+        $this->document->setTitle($this->language->get("module_title"));
 
         $this->load->model("setting/setting");
 
@@ -134,7 +134,7 @@ class Agentfy extends \Opencart\System\Engine\Controller
         ];
 
         $data["breadcrumbs"][] = [
-            "text" => $this->language->get("heading_title"),
+            "text" => $this->language->get("module_title"),
             "href" => $this->url->link(
                 "extension/agentfy/module/agentfy",
                 "user_token=" . $this->session->data["user_token"],
@@ -760,7 +760,7 @@ class Agentfy extends \Opencart\System\Engine\Controller
                 );
             }
 
-            $this->document->setTitle($this->language->get("heading_title"));
+            $this->document->setTitle($this->language->get("module_title"));
 
             $data["breadcrumbs"] = [];
 
@@ -785,7 +785,7 @@ class Agentfy extends \Opencart\System\Engine\Controller
             ];
 
             $data["breadcrumbs"][] = [
-                "text" => $this->language->get("heading_title"),
+                "text" => $this->language->get("module_title"),
                 "href" => $this->url->link(
                     "extension/agentfy/module/agentfy",
                     "user_token=" . $this->session->data["user_token"],

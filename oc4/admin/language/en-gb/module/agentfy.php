@@ -1,6 +1,7 @@
 <?php
 // Heading
-$_['heading_title']     = 'Agentfy.AI';
+$_['heading_title']     = '<div style="display: flex; justify-content: space-between; align-items: center;"><span>Agentfy.AI</span><img src="' . HTTP_CATALOG . 'extension/agentfy/image/badge.svg"/></div>';
+$_['module_title']      = 'Agentfy.AI';
 
 // Text
 $_['text_extension']    = 'Extensions';
