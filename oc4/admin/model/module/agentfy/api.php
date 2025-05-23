@@ -64,6 +64,49 @@ class Api extends \Opencart\System\Engine\Model {
         }
     }
 
+    public function login($login_data)
+    {
+
+        $response = $this->request("POST", "/auth/login", [
+            "email" => $login_data["email"],
+            "password" => $login_data["password"],
+            "deviceId" => "opencart",
+        ], 0 , '');
+
+        return isset($response["accessToken"]) ? $response["accessToken"] : null;
+    }
+
+    public function addDefaultTeam()
+    {
+        $words = explode(' ', $this->config->get('config_name'));
+        $codename = '';
+
+        foreach ($words as $word) {
+            $word = preg_replace('/[^a-zA-Z]/', '', $word);
+            $codename .= strtolower($word[0]);
+        }
+
+        if(strlen($codename) < 3) {
+            $codename .= '-team';
+        }
+
+        $response = $this->request("POST", "/teams", [
+            "name" => $this->config->get('config_name'),
+            "codename" => $codename,
+        ], 0, "");
+
+        return isset($response['data']) ? $response['data'] : null;
+    }
+
+    public function addApiKey($team_id)
+    {
+        $response = $this->request("POST", "/apiKeys", [
+            "name" => $this->config->get('config_name') . ' API Key'
+        ], 0 , "/teams/:teamId", $team_id);
+
+        return isset($response["data"]) ? $response["data"] : null;
+    }
+
     public function addKnowledge($name, $sourceIds, $store_id = 0)
     {
         $response = $this->request("POST", "/knowledges", [
@@ -307,14 +350,18 @@ class Api extends \Opencart\System\Engine\Model {
             return $response["data"];
         }
     }
-    public function request($method, $url, $body = [], $store_id = 0, $prefix="/teams/:teamId")
+    public function request($method, $url, $body = [], $store_id = 0, $prefix="/teams/:teamId", $team_id = null)
     {
         $this->load->model("setting/setting");
         $setting = $this->model_setting_setting->getValue("module_agentfy_setting", $store_id);
-        if (empty ($setting)) {
-            throw new Exception("Invalid API key");
-            return;
+
+        if(!isset($this->session->data['agentfy_bearer_token'])) {
+            if (empty ($setting) && $url != "/auth/login") {
+                throw new Exception("Invalid API key");
+                return;
+            }
         }
+
         $module_setting = json_decode($setting, true);
         $curl = curl_init();
 
@@ -324,8 +371,18 @@ class Api extends \Opencart\System\Engine\Model {
             $apiUrl = $module_setting['api_url'];
         }
 
-        if (!empty($prefix) && !empty($module_setting["team_id"])) {
-            $url = str_replace(":teamId", $module_setting["team_id"], $prefix) . $url;
+        
+        if (!empty($prefix)) {
+            $url = str_replace(":teamId", $team_id ? $team_id : $module_setting["team_id"], $prefix) . $url;
+        }
+
+        $headers = [
+            "Content-Type: application/json",
+            "api-key: " . ($module_setting["api_key"] ?? ""),
+        ];
+
+        if (isset($this->session->data['agentfy_bearer_token'])) {
+            $headers[] = "Authorization: Bearer " . $this->session->data['agentfy_bearer_token'];
         }
 
         curl_setopt_array($curl, [
@@ -337,10 +394,7 @@ class Api extends \Opencart\System\Engine\Model {
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => $method,
-            CURLOPT_HTTPHEADER => [
-                "Content-Type: application/json",
-                "api-key:" . $module_setting["api_key"],
-            ],
+            CURLOPT_HTTPHEADER => $headers,
         ]);
 
         if (!empty($body)) {
@@ -368,7 +422,7 @@ class Api extends \Opencart\System\Engine\Model {
                 'method' => $method,
                 'headers' => [
                     "Content-Type" => "application/json",
-                    "api-key" => $module_setting["api_key"],
+                    "api-key" => ($module_setting["api_key"] ?? ""),
                 ],
                 'data' => $body,
             ]);

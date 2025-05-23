@@ -494,6 +494,9 @@ class ControllerExtensionModuleAgentfy extends Controller
         $this->load->model("extension/agentfy/api");
         $this->load->model('localisation/language');
 
+        $this->model_extension_module_agentfy->uninstallEvents();
+        $this->model_extension_module_agentfy->installEvents();
+
         $data = [];
 
         $this->config->load('agentfy');
