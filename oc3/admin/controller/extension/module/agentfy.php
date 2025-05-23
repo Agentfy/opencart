@@ -74,6 +74,14 @@ class ControllerExtensionModuleAgentfy extends Controller
             $data["error_team_id"] = "";
         }
 
+        if (isset($this->session->data['success'])) {
+			$data['success'] = $this->session->data['success'];
+
+			unset($this->session->data['success']);
+		} else {
+			$data['success'] = '';
+		}
+
         $data["breadcrumbs"] = [];
 
         $data["breadcrumbs"][] = [
@@ -119,6 +127,12 @@ class ControllerExtensionModuleAgentfy extends Controller
 
         $data["createAgent"] = $this->url->link(
             "extension/module/agentfy/createAgent",
+            "user_token=" . $this->session->data["user_token"]."&store_id=".$this->store_id,
+            true
+        );
+
+        $data["launch"] = $this->url->link(
+            "extension/module/agentfy/launch",
             "user_token=" . $this->session->data["user_token"]."&store_id=".$this->store_id,
             true
         );
@@ -185,6 +199,8 @@ class ControllerExtensionModuleAgentfy extends Controller
                 );
             }
         }
+
+        $data['docs_href'] = 'https://docs.agentfy.ai';
 
         if (isset($this->request->post["module_agentfy_display"])) {
             $data["module_agentfy_display"] =
@@ -467,6 +483,130 @@ class ControllerExtensionModuleAgentfy extends Controller
 
         $data["error"] = $this->error;
 
+        $this->response->addHeader("Content-Type: application/json");
+        $this->response->setOutput(json_encode($data));
+    }
+
+    public function launch()
+    {
+        $this->load->language("extension/module/agentfy");
+        $this->load->model("setting/setting");
+        $this->load->model("extension/agentfy/api");
+        $this->load->model('localisation/language');
+
+        $data = [];
+
+        $this->config->load('agentfy');
+
+        $setting['module_agentfy_setting'] = $this->config->get('module_agentfy_setting');
+        $setting['module_agentfy_display'] = $this->config->get('module_agentfy_display');
+
+        $languages = $this->model_localisation_language->getLanguages();
+        $welcomeMessage = [];
+
+        foreach ($languages as $language) {
+            $welcomeMessage[$language['language_id']] = 'Welcome to ' . $this->config->get('config_name');
+        }
+
+        $setting['module_agentfy_display']['welcomeMessage'] = $welcomeMessage;
+
+
+        $cache_setting['agentfy_cache'] = [
+            'status' => true
+        ];
+
+        if (!$this->user->hasPermission("modify", "extension/module/agentfy")) {
+            $this->response->setOutput(
+                json_encode(["error" => $this->language->get("error_permission")])
+            );
+            return;
+        }
+
+        $login_data = [
+            "email" => $this->request->post["email"],
+            "password" => $this->request->post["password"],
+        ];
+
+        $access_token = $this->model_extension_agentfy_api->login(
+            $login_data
+        );
+
+        if($access_token) {
+            $this->session->data["agentfy_bearer_token"] = $access_token;
+            $team = $this->model_extension_agentfy_api->addDefaultTeam();
+            
+            if($team) {
+                $setting['module_agentfy_setting'] ['team_id'] = $team['id'];
+                $api_key = $this->model_extension_agentfy_api->addApiKey($team['id']);
+
+                if($api_key) {
+                    $setting['module_agentfy_setting']['api_key'] = $api_key['secret'];
+                    $setting['module_agentfy_status'] = 1;
+
+                    $this->model_setting_setting->editSetting(
+                        "agentfy_cache",
+                        $cache_setting,
+                        0
+                    );
+
+                    $this->model_setting_setting->editSetting(
+                        "module_agentfy",
+                        $setting,
+                        0
+                    );
+
+                    $products_source = $this->model_extension_agentfy_api->addSource('products');
+                    $categories_source = $this->model_extension_agentfy_api->addSource('categories');
+                    $manufacturers_source = $this->model_extension_agentfy_api->addSource('manufacturers');
+
+                    $knowledge = $this->model_extension_agentfy_api->addKnowledge(
+                        $this->config->get('config_name'),
+                        [$products_source['id'], $categories_source['id'], $manufacturers_source['id']],
+                        0
+                    );
+
+                    if ($knowledge) {
+                        $agent = $this->model_extension_agentfy_api->addAgent(
+                            $this->config->get('config_name') . ' Agent',
+                            $this->request->post["prompt"],
+                            $knowledge['id'],
+                            0
+                        );
+
+                        $agent_setting = ['module_agentfy_setting' => [
+                            'agent_id' => $agent['id']
+                        ]];
+
+                        $setting = $this->model_setting_setting->getSetting(
+                            "module_agentfy", 0
+                        );
+
+                        $setting = array_replace_recursive($setting, $agent_setting);
+
+                        $this->model_setting_setting->editSetting(
+                            "module_agentfy",
+                            $setting,
+                            $this->store_id
+                        );
+                    } else {
+                        $data['error'][] = $this->language->get('error_knowledge');
+                    }
+                } else {
+               
+                    $data['error'][] = $this->language->get('error_api_key');
+                }
+            } else {
+                $data['error'][] = $this->language->get('error_team');
+            }
+        } else {
+            $data['error'][] = $this->language->get('error_token');
+        }
+
+        if(!isset($data['error'])) {
+            $this->session->data['success'] = $this->language->get('success_launch');
+        }
+
+        unset($this->session->data["agentfy_bearer_token"]);
         $this->response->addHeader("Content-Type: application/json");
         $this->response->setOutput(json_encode($data));
     }

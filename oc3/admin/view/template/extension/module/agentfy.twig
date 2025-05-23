@@ -2,6 +2,11 @@
 <div id="content" class="module-agentfy">
     <div class="page-header">
         <div class="container-fluid">
+            {% if success %}
+            <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+            {% endif %}
             <div class="form-inline pull-right">
                 {% if (stores) %}
                     <select id="store" onChange="location = '{{ module_link }}&store_id=' + $('#store').val()"
@@ -11,6 +16,9 @@
                         {% endfor %}
                     </select>
                 {% endif %}
+                <a class="btn btn-default" href="{{ docs_href }}">
+                    {{ entry_docs }}
+                </a>
                 <button data-toggle="tooltip" title="{{ button_save }}" class="button-save btn btn-primary">
                     <i class="fa fa-save"></i>
                 </button>
@@ -43,7 +51,10 @@
                 <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-module" class="form-horizontal">
                     <ul class="nav nav-tabs">
                         {% if not module_agentfy_setting['api_key'] %}
-                            <li class="active">
+                             <li class="active">
+                                <a href="#tab-quick-launch" data-toggle="tab">{{ tab_quick_launch }}</a>
+                            </li>
+                            <li>
                                 <a href="#tab-general" data-toggle="tab">{{ tab_general }}</a>
                             </li>
                         {% endif %}
@@ -63,7 +74,13 @@
                         {% endif %}
                     </ul>
                     <div class="tab-content">
-                        <div class="tab-pane {% if not module_agentfy_setting['api_key'] %} active {% endif %}" id="tab-general">
+                        <div class="tab-pane {% if not module_agentfy_setting['api_key'] %} active {% endif %}" id="tab-quick-launch">
+                            <div class="launch-block">
+                                <p class="launch-block__text">{{ text_launch }}</p>
+                                <button class="launch-block__button btn btn-primary btn-lg" type="button" data-toggle="modal" data-target="#launch_modal">{{ button_launch }}</button>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tab-general">
                             <div class="form-group">
                                 <label class="col-sm-2 control-label" for="input-name">{{ entry_api_key }}</label>
                                 <div class="col-sm-10">
@@ -99,9 +116,6 @@
                                         </span>
                                     </div>
                                     <input type="hidden" name="module_agentfy_setting[team_id]" id="team_id" value="{{ module_agentfy_setting['team_id'] }}"/>
-                                    {% if error_team %}
-                                        <div class="text-danger">{{ error_team }}</div>
-                                    {% endif %}
                                 </div>
                             </div>
                             <div class="form-group">
@@ -483,6 +497,45 @@
             </div>
         </div>
     </div>
+
+    <div id="launch_modal" class="modal fade">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="launch_modal_label">{{ text_modal_login_title }}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ launch }}" method="post" enctype="multipart/form-data" id="form-launch" class="form-horizontal">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label" for="input-email">{{ entry_email }}</label>
+                            <div class="col-sm-10">
+                                <input type="email" name="email" placeholder="{{ entry_email }}" id="input-email" class="form-control" value=""/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label" for="input-password">{{ entry_password }}</label>
+                            <div class="col-sm-10">
+                                <input type="password" name="password" placeholder="{{ entry_password }}" id="input-password" class="form-control" value=""/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label" for="input-prompt">{{ entry_prompt }}</label>
+                            <div class="col-sm-10">
+                                <textarea name="prompt" placeholder="{{ entry_prompt }}" id="input-prompt" class="form-control" rows="10">{{ prompt }}</textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ button_close }}</button>
+                    <button type="button" class="btn btn-primary button_launch">{{ button_launch }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <script type="text/javascript">
 $('.module-agentfy').on('input', '[name^=module_agentfy_display]', function (e) {
@@ -545,6 +598,45 @@ $('.module-agentfy').on('click', '.button_create_agent', function() {
         }
     });
 });
+
+$('.module-agentfy').on('click', '.button_launch', function() {
+    $.ajax({
+        type: 'post',
+        url: $('#form-launch').attr('action'),
+        data: $('#form-launch').serialize(),
+        dataType: 'json',
+        beforeSend: function() {
+            $('.button_launch').button('loading');
+        },
+        complete: function() {
+           // $('.button_launch').button('reset');
+           // $('.button_launch').prop('disabled', true);
+        },
+        success: function(json) {
+            if (!json['error']) {
+                $('#launch_modal .modal-body .alert-danger').remove();
+                location.reload(true);
+            } else {
+                $('#launch_modal .modal-body .alert-danger').remove();
+
+                json['error'].forEach(function(errorMsg) {
+                    $('.button_launch').button('reset');
+                    $('#launch_modal .modal-body').prepend(
+                        '<div class="alert alert-danger alert-dismissible">' +
+                            '<i class="fa fa-exclamation-circle"></i> ' +
+                            '<button type="button" class="close" data-dismiss="alert">&times;</button> ' +
+                            errorMsg +
+                        '</div>'
+                    );
+                });
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+    });
+});
+
 $('.module-agentfy').on('click', '.button_create_team', function() {
     $.ajax({
         type: 'post',
@@ -780,6 +872,17 @@ $('input[name=\'team\']').autocomplete({
         font-size: 14px;
         font-weight: 500;
         margin: 8px 0;
+    }
+    .launch-block {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+    .launch-block__text {
+        font-size: 18px;
+        max-width: 600px;
+        text-align: center;
     }
 </style>
 {{ footer }}
